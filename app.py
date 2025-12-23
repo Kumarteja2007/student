@@ -5,7 +5,6 @@ import hashlib
 app = Flask(__name__)
 app.secret_key = "secret123"
 
-# ---------------- Database Setup ----------------
 def get_db_connection():
     conn = sqlite3.connect("students.db")
     conn.row_factory = sqlite3.Row
@@ -22,11 +21,9 @@ CREATE TABLE IF NOT EXISTS students (
 conn.commit()
 conn.close()
 
-# ---------------- Password Hashing ----------------
 def hash_password(password):
     return hashlib.sha256(password.encode()).hexdigest()
 
-# ---------------- Routes ----------------
 @app.route("/")
 def index():
     return render_template("index.html")
