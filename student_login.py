@@ -2,13 +2,10 @@ import sqlite3
 import hashlib
 import getpass
 
-# -------------------------------
-# Database Connection
-# -------------------------------
+
 conn = sqlite3.connect("students.db")
 cursor = conn.cursor()
 
-# Create table if not exists
 cursor.execute("""
 CREATE TABLE IF NOT EXISTS students (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -18,15 +15,9 @@ CREATE TABLE IF NOT EXISTS students (
 """)
 conn.commit()
 
-# -------------------------------
-# Password Hashing Function
-# -------------------------------
 def hash_password(password):
     return hashlib.sha256(password.encode('utf-8')).hexdigest()
 
-# -------------------------------
-# Registration Function
-# -------------------------------
 def register():
     print("\n--- Student Registration ---")
     username = input("Enter username: ").strip()
@@ -34,11 +25,11 @@ def register():
     confirm_password = getpass.getpass("Confirm password: ")
 
     if not username or not password:
-        print("❌ Username and password cannot be empty!")
+        print("Username and password cannot be empty!")
         return
 
     if password != confirm_password:
-        print("❌ Passwords do not match!")
+        print("Passwords do not match!")
         return
 
     encrypted_password = hash_password(password)
@@ -49,13 +40,10 @@ def register():
             (username, encrypted_password)
         )
         conn.commit()
-        print("✅ Registration successful!")
+        print("Registration successful!")
     except sqlite3.IntegrityError:
-        print("❌ Username already exists!")
+        print("Username already exists!")
 
-# -------------------------------
-# Login Function
-# -------------------------------
 def login():
     print("\n--- Student Login ---")
     username = input("Enter username: ").strip()
@@ -69,13 +57,10 @@ def login():
     )
 
     if cursor.fetchone():
-        print(f"🎉 Login successful! Welcome, {username}")
+        print(f"Login successful! Welcome, {username}")
     else:
-        print("❌ Invalid username or password!")
+        print("Invalid username or password!")
 
-# -------------------------------
-# Main Menu
-# -------------------------------
 def main_menu():
     while True:
         print("\n===== Student Login System =====")
@@ -90,13 +75,10 @@ def main_menu():
         elif choice == "2":
             login()
         elif choice == "3":
-            print("👋 Thank you for using the system!")
+            print("Thank you for using the system!")
             break
         else:
-            print("⚠️ Invalid choice. Please try again.")
+            print("Invalid choice. Please try again.")
 
-# -------------------------------
-# Run Program
-# -------------------------------
 main_menu()
 conn.close()
