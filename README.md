@@ -85,3 +85,18 @@ Open your browser and visit:
 ```text
 http://127.0.0.1:8000
 ```
+
+## 🚀 Future Enhancements
+
+- Faculty Portal
+- Admin Dashboard
+- Course Registration
+- Fee Management
+- Assignment Submission
+- Email Notifications
+- Role-Based Access Control
+- JWT Authentication
+- REST API Integration
+- Responsive Mobile Interface
+
+---
