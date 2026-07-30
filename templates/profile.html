@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Profile</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+<div class="container">
+    <h2>Students Profile</h2>
+    {% if message %}
+    <p class="message">{{ message }}</p>
+    {% endif %}
+    <form action="/update-profile" method="post">
+        <input
+            type="hidden"
+            name="username"
+            value="{{ student.username }}"
+            required
+        >
+        <label>Student ID</label>
+        <input
+            type="text"
+            value="{{ student.student_id }}"
+            readonly
+            required
+        >
+        <label>Username</label>
+        <input
+            type="text"
+            value="{{ student.username }}"
+            readonly
+            required
+        >
+        <label>Email</label>
+        <input
+            type="email"
+            value="{{ student.email_id }}"
+            readonly
+            required
+        >
+        <label>Full Name</label>
+        <input
+            type="text"
+            name="full_name"
+            value="{{ student.full_name or '' }}"
+            required
+        >
+        <label>Mobile Number</label>
+        <input
+            type="text"
+            name="mobile"
+            value="{{ student.mobile or '' }}"
+            required
+        >
+        <label>Degree</label>
+        <input
+            type="text"
+            name="degree"
+            value="{{ student.degree or '' }}"
+            required
+        >
+        <label>Degree Period</label>
+        <input
+            type="text"
+            name="degree_period"
+            value="{{ student.degree_period or '' }}"
+            required
+        >
+        <label>Department</label>
+        <input
+            type="text"
+            name="department"
+            value="{{ student.department or '' }}"
+            required
+        >
+        <label>Section</label>
+        <input
+            type="text"
+            name="section"
+            value="{{ student.section or '' }}"
+            required
+        >
+        <label>Semester</label>
+        <input
+            type="number"
+            name="semester"
+            value="{{ student.semester or '' }}"
+            required
+        >
+        <label>Father Name</label>
+        <input
+            type="text"
+            name="father_name"
+            value="{{ student.father_name or '' }}"
+            required
+        >
+        <label>Father Mobile</label>
+        <input
+            type="text"
+            name="father_mobile"
+            value="{{ student.father_mobile or '' }}"
+            required
+        >
+        <label>Mother Name</label>
+        <input
+            type="text"
+            name="mother_name"
+            value="{{ student.mother_name or '' }}"
+            required
+        >
+        <label>Mother Mobile</label>
+        <input
+            type="text"
+            name="mother_mobile"
+            value="{{ student.mother_mobile or '' }}"
+            required
+        >
+        <label>Parent Email</label>
+        <input
+            type="email"
+            name="parent_email"
+            value="{{ student.parent_email or '' }}"
+            required
+        >
+        <button type="submit">
+            Save Profile
+        </button>
+    </form>
+    <br>
+    <a href="/student-dashboard/{{username}}">
+        <button type="button">
+            ← Back to Dashboard
+        </button>
+    </a>
+</div>
+</body>
+</html>

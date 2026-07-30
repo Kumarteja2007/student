@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Course Materials</title>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet"
+          href="/static/style.css">
+</head>
+<body>
+<div class="container">
+    <h2>Course Materials</h2>
+    <table>
+        <tr>
+            <th>Subject</th>
+            <th>File Name</th>
+            <th>Uploaded On</th>
+            <th>Download</th>
+        </tr>
+        {% for row in materials %}
+        <tr>
+            <td>{{ row.subject }}</td>
+            <td>{{ row.file_name }}</td>
+            <td>{{ row.uploaded_on }}</td>
+            <td>
+                <a href="/download/{{row.id}}">
+                    <button type="button">
+                        Download
+                    </button>
+
+                </a>
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+    <br>
+    <a href="/student-dashboard/{{username}}">
+        <button type="button">
+            ← Back to Dashboard
+        </button>
+    </a>
+</div>
+</body>
+</html>

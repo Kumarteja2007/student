@@ -1,81 +1,396 @@
+/* ---------- Global ---------- */
+
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-    font-family: Arial, sans-serif;
+    font-family: Arial, Helvetica, sans-serif;
 }
 
 body {
-    height: 100vh;
-    background: linear-gradient(120deg, #4e73df, #1cc88a);
+    background: linear-gradient(135deg, #4e73df, #1cc88a);
+    min-height: 100vh;
     display: flex;
     justify-content: center;
     align-items: center;
 }
 
+/* ---------- Main Container ---------- */
+
 .container {
-    background: #ffffff;
+    width: 380px;
+    max-width: 90%;
+    background: white;
     padding: 30px;
-    width: 360px;
-    border-radius: 10px;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+    border-radius: 12px;
+    box-shadow: 0px 8px 25px rgba(0, 0, 0, 0.2);
     text-align: center;
 }
 
+.container h1,
 .container h2 {
+    color: #333;
+    margin-bottom: 20px;
+}
+
+/* ---------- Login & Register ---------- */
+
+.forms {
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+}
+
+.box h2 {
+    color: #4e73df;
     margin-bottom: 15px;
 }
 
-.box {
-    margin-top: 20px;
-}
-
-.box h3 {
-    color: #4e73df;
-    margin-bottom: 10px;
-}
+/* ---------- Inputs ---------- */
 
 input {
     width: 100%;
-    padding: 10px;
-    margin: 6px 0;
-    border-radius: 5px;
+    padding: 12px;
+    margin: 8px 0;
     border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 15px;
 }
+
+input:focus {
+    outline: none;
+    border-color: #4e73df;
+    box-shadow: 0 0 5px rgba(78, 115, 223, 0.4);
+}
+
+/* ---------- Buttons ---------- */
 
 button {
     width: 100%;
-    padding: 10px;
+    padding: 12px;
     background: #4e73df;
-    border: none;
     color: white;
-    border-radius: 5px;
-    margin-top: 10px;
+    border: none;
+    border-radius: 6px;
     cursor: pointer;
+    font-size: 16px;
+    margin-top: 10px;
+    transition: 0.3s;
 }
 
 button:hover {
     background: #2e59d9;
 }
 
-.message {
-    background: #f1f1f1;
-    padding: 8px;
-    margin-bottom: 10px;
-    border-radius: 5px;
-    color: #333;
+/* ---------- Messages ---------- */
+
+.message{
+    background:#e8f4ff;
+    color:#0c5460;
+    border:1px solid #bee5eb;
+    padding:12px;
+    border-radius:8px;
+    text-align:center;
+    margin-bottom:18px;
+    font-weight:bold;
 }
+
+/* ================= LINKS ================= */
+
+a{
+    text-decoration:none;
+}
+
+.login-box a{
+    color:#4e73df;
+    font-weight:600;
+}
+
+.login-box a:hover{
+    color:#2e59d9;
+    text-decoration:underline;
+}
+
+.sidebar a{
+    color:white;
+}
+
+.sidebar a:hover{
+    background:#374151;
+}
+
+
+/* ================= LOGIN LINKS ================= */
+
+.forgot-password{
+    text-align:right;
+    margin-top:8px;
+    margin-bottom:15px;
+}
+
+.forgot-password a{
+    color:#4e73df;
+    font-weight:600;
+}
+
+.back-home{
+    display:block;
+    text-align:center;
+    margin-top:15px;
+    color:#4e73df;
+    font-weight:600;
+}
+
+.back-home:hover{
+    color:#2e59d9;
+}
+
+/* ---------- Logout Button ---------- */
+
 .logout-btn {
     display: inline-block;
-    margin-top: 15px;
-    padding: 10px;
     width: 100%;
-    text-decoration: none;
+    margin-top: 15px;
+    padding: 12px;
     background: #e74a3b;
     color: white;
-    border-radius: 5px;
+    text-decoration: none;
+    border-radius: 6px;
+    transition: 0.3s;
 }
 
 .logout-btn:hover {
     background: #c0392b;
+    text-decoration: none;
+}
+
+/* ---------- Responsive ---------- */
+
+@media (max-width: 500px) {
+    .container {
+        width: 95%;
+        padding: 20px;
+    }
+    button {
+        font-size: 15px;
+    }
+}
+.dashboard-menu{
+    display:flex;
+    flex-direction:column;
+    gap:15px;
+    margin-top:20px;
+}
+
+.dashboard-menu button{
+    width:100%;
+}
+.dashboard{
+    display:flex;
+    width:100%;
+    min-height:100vh;
+}
+
+.sidebar{
+    width:260px;
+    background:#1f2937;
+    padding:30px 20px;
+    display:flex;
+    flex-direction:column;
+}
+
+.sidebar h2{
+    color:white;
+    margin-bottom:30px;
+    text-align:center;
+}
+
+.sidebar a{
+    color:white;
+    padding:15px;
+    margin-bottom:10px;
+    border-radius:8px;
+    text-decoration:none;
+    transition:.3s;
+}
+
+.sidebar a:hover{
+    background:#374151;
+    text-decoration:none;
+}
+
+/* ================= PROFILE PAGE ================= */
+
+.container{
+    width:60%;
+    margin:40px auto;
+}
+.container h2{
+    text-align:center;
+    margin-bottom:25px;
+}
+label{
+    display:block;
+    font-weight:bold;
+    margin-top:15px;
+    margin-bottom:5px;
+}
+input[type="text"],
+input[type="email"],
+input[type="number"],
+input[type="password"]{
+    width:100%;
+    padding:12px;
+    border:1px solid #ccc;
+    border-radius:8px;
+    font-size:16px;
+    box-sizing:border-box;
+}
+input[readonly]{
+    background:#f2f2f2;
+    color:#555;
+    cursor:not-allowed;
+}
+button{
+    width:100%;
+    margin-top:25px;
+    padding:12px;
+    border:none;
+    border-radius:8px;
+    font-size:16px;
+    cursor:pointer;
+    transition:0.3s;
+}
+button:hover{
+    opacity:0.9;
+    transform:scale(1.02);
+}
+a{
+    text-decoration:none;
+}
+@media(max-width:768px){
+    .container{
+        width:90%;
+    }
+
+}
+/* ================= ATTENDANCE TABLE ================= */
+
+table{
+    width:100%;
+    border-collapse:collapse;
+    margin-top:20px;
+}
+
+table th{
+    padding:12px;
+    border:1px solid #ddd;
+    text-align:center;
+}
+
+table td{
+    padding:12px;
+    border:1px solid #ddd;
+    text-align:center;
+}
+
+table th{
+    background:#4CAF50;
+    color:white;
+}
+
+table tr:nth-child(even){
+    background:#f8f8f8;
+}
+
+table tr:hover{
+    background:#eeeeee;
+}
+
+/* ================= NOTIFICATIONS ================= */
+
+.notification-card{
+    background:#ffffff;
+    border-left:6px solid #4CAF50;
+    padding:20px;
+    margin-bottom:20px;
+    border-radius:8px;
+    box-shadow:0 2px 8px rgba(0,0,0,0.1);
+}
+
+.notification-card h3{
+    margin-bottom:10px;
+}
+
+.notification-card p{
+    margin-bottom:10px;
+    line-height:1.6;
+}
+
+.notification-card small{
+    color:gray;
+}
+
+/* ================= LOGIN / REGISTER / CHANGE PASSWORD ================= */
+
+.login-container{
+    width:100%;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    padding:30px;
+}
+
+.login-box{
+    width:420px;
+    max-width:95%;
+    background:#ffffff;
+    padding:35px;
+    border-radius:12px;
+    box-shadow:0 10px 30px rgba(0,0,0,0.25);
+}
+
+.login-box h2{
+    text-align:center;
+    color:#4e73df;
+    margin-bottom:25px;
+}
+
+.login-box label{
+    display:block;
+    margin-top:12px;
+    margin-bottom:6px;
+    font-weight:bold;
+    color:#333;
+}
+
+.login-box input{
+    width:100%;
+    padding:12px;
+    border:1px solid #ccc;
+    border-radius:8px;
+    margin-bottom:12px;
+    font-size:15px;
+}
+
+.login-box button{
+    width:100%;
+    padding:12px;
+    margin-top:10px;
+    background:#4e73df;
+    color:white;
+    border:none;
+    border-radius:8px;
+    cursor:pointer;
+    font-size:16px;
+}
+
+.login-box button:hover{
+    background:#2e59d9;
+}
+
+.login-box hr{
+    margin:20px 0;
+    border:0;
+    border-top:1px solid #ddd;
 }

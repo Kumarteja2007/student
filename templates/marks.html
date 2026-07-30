@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Marks</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+<div class="container">
+    <h2>Academic Marks</h2>
+    <table>
+        <tr>
+            <th>Semester</th>
+            <th>Subject</th>
+            <th>Mid-1</th>
+            <th>Mid-2</th>
+            <th>Internal</th>
+            <th>Final</th>
+            <th>Total</th>
+            <th>Percentage</th>
+            <th>Grade</th>
+        </tr>
+        {% for row in records %}
+        <tr>
+            <td>{{ row.semester }}</td>
+            <td>{{ row.subject }}</td>
+            <td>{{ row.mid1 }}</td>
+            <td>{{ row.mid2 }}</td>
+            <td>{{ row.internal_marks }}</td>
+            <td>{{ row.final_exam }}</td>
+            <td>{{ row.total }}</td>
+            <td>{{ row.percentage }}%</td>
+            <td>{{ row.grade }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+    <br>
+    <a href="/student-dashboard/{{username}}">
+        <button type="button">
+            ← Back to Dashboard
+        </button>
+    </a>
+</div>
+</body>
+</html>

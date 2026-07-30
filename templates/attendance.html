@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Attendance</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+<div class="container">
+    <h2>Attendance Details</h2>
+    <table>
+        <tr>
+            <th>Subject</th>
+            <th>Present</th>
+            <th>Total Classes</th>
+            <th>Attendance %</th>
+        </tr>
+        {% for row in records %}
+        <tr>
+            <td>{{ row.subject }}</td>
+            <td>{{ row.classes_present }}</td>
+            <td>{{ row.total_classes }}</td>
+            <td>{{ row.percentage }}%</td>
+        </tr>
+        {% endfor %}
+    </table>
+    <br>
+    <a href="/student-dashboard/{{username}}">
+        <button type="button">
+            ← Back to Dashboard
+        </button>
+    </a>
+</div>
+</body>
+</html>

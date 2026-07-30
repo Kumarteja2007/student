@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+    <title>Notifications</title>
+    <link rel="stylesheet"
+          href="/static/style.css">
+</head>
+<body>
+<div class="container">
+    <h2>Latest Notifications</h2>
+    {% if notifications %}
+        {% for notice in notifications %}
+        <div class="notification-card">
+            <h3>{{ notice.title }}</h3>
+            <p>{{ notice.message }}</p>
+            <small>
+                Posted on:
+                {{ notice.posted_on }}
+            </small>
+        </div>
+        {% endfor %}
+    {% else %}
+        <p>No notifications available.</p>
+    {% endif %}
+    <br>
+    <a href="/student-dashboard/{{username}}">
+        <button type="button">
+            ← Back to Dashboard
+        </button>
+    </a>
+</div>
+</body>
+</html>
