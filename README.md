@@ -73,7 +73,15 @@ student/
 ---
 
 ## ▶️ Run the Project
+
 Start the FastAPI development server:
+
+```bash
 uvicorn app:app --reload
+```
+
 Open your browser and visit:
+
+```text
 http://127.0.0.1:8000
+```
