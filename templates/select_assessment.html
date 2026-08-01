@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Select Assessment</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+<div class="container">
+    <h2>📝 Select Assessment</h2>
+    <div class="assignment-card">
+        <h3>{{ assignment.subject }}</h3>
+        <p><strong>Department:</strong> {{ assignment.department }}</p>
+        <p><strong>Semester:</strong> {{ assignment.semester }}</p>
+        <p><strong>Section:</strong> {{ assignment.section }}</p>
+        <p><strong>Slot:</strong> {{ assignment.slot }}</p>
+    </div>
+    <br>
+    <form action="/enter-marks/{{ assignment.id }}/{{ username }}" method="get">
+        <label><strong>Select Assessment</strong></label>
+        <select name="assessment_type" required>
+            <option value="">Choose Assessment</option>
+            {% for assessment in assessments %}
+            <option value="{{assessment.assessment_name}}">
+                {{assessment.assessment_name}} ({{assessment.max_marks}} Marks)
+            </option>
+            {% endfor %}
+        </select>
+        <br><br>
+        <button type="submit">
+            Continue →
+        </button>
+    </form>
+    <br>
+    <a href="/faculty-marks/{{ username }}">
+        <button type="button">
+            ← Back
+        </button>
+    </a>
+</div>
+</body>
+</html>

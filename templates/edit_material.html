@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Edit Course Material</title>
+<link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+
+<div class="container">
+
+<h2>✏ Edit Course Material</h2>
+
+{% if message %}
+<div class="{% if 'Successfully' in message %}success-message{% else %}error-message{% endif %}">
+{{message}}
+</div>
+{% endif %}
+
+<form action="/edit-material/{{material.id}}/{{username}}" method="post" enctype="multipart/form-data">
+
+<label>Subject</label>
+<input type="text" value="{{material.subject}}" readonly>
+
+<label>Title</label>
+<input type="text" name="title" value="{{material.title}}" required>
+
+<label>Description</label>
+<textarea name="description" rows="5" required>{{material.description}}</textarea>
+
+<label>Current File</label>
+<input type="text" value="{{material.file_name}}" readonly>
+
+<label>Replace File (Optional)</label>
+<input type="file" name="material" accept=".pdf,.ppt,.pptx,.doc,.docx">
+
+<br><br>
+
+<button type="submit">
+💾 Update Material
+</button>
+
+<a href="/faculty-materials/{{username}}">
+<button type="button">
+← Cancel
+</button>
+</a>
+
+</form>
+
+</div>
+
+</body>
+</html>

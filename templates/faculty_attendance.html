@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Attendance</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+<div class="container">
+    <h2>📅 Manage Attendance</h2>
+    {% if assignments %}
+        {% for row in assignments %}
+        <div class="attendance-card">
+            <h3>{{ row.subject }}</h3>
+            <hr>
+            <p><strong>Semester :</strong> {{ row.semester }}</p>
+            <p><strong>Section :</strong> {{ row.section }}</p>
+            <p><strong>Slot :</strong> {{ row.slot }}</p>
+            <p><strong>Total Students :</strong> {{ row.total_students }}</p>
+            <div class="attendance-buttons">
+                <a href="/take-attendance/{{ row.id }}/{{ username }}">
+                    <button type="button">
+                        ✅ Take Attendance
+                    </button>
+                </a>
+                <a href="/attendance-history/{{ row.id }}/{{ username }}">
+                    <button type="button">
+                        📋 View History
+                    </button>
+                </a>
+            </div>
+        </div>
+        {% endfor %}
+    {% else %}
+        <h3 style="text-align:center;color:red;">
+            No Classes Assigned
+        </h3>
+    {% endif %}
+    <br>
+    <a href="/faculty-dashboard/{{ username }}">
+        <button type="button">
+            ← Back to Dashboard
+        </button>
+    </a>
+</div>
+</body>
+</html>

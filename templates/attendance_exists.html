@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Attendance Already Exists</title>
+
+    <link rel="stylesheet"
+          href="/static/style.css">
+
+</head>
+
+<body>
+
+<div class="container attendance-summary">
+
+    <div class="success-box" style="background:#ffc107;color:black;">
+
+        <h2>⚠ Attendance Already Exists</h2>
+
+    </div>
+
+    <br>
+
+    <div class="summary-card">
+
+        <h2>{{ session.subject }}</h2>
+
+        <hr>
+
+        <p><strong>Date :</strong> {{ session.attendance_date }}</p>
+
+        <p><strong>Semester :</strong> {{ session.semester }}</p>
+
+        <p><strong>Section :</strong> {{ session.section }}</p>
+
+        <p><strong>Slot :</strong> {{ session.slot }}</p>
+
+    </div>
+
+    <br>
+
+    <p style="text-align:center;font-size:18px;">
+
+        Attendance has already been submitted for this class on this date.
+
+    </p>
+
+    <br>
+
+    <div class="summary-buttons">
+
+        <a href="/view-attendance/{{ session.session_id }}/{{ username }}">
+
+            <button>
+
+                👁 View Attendance
+
+            </button>
+
+        </a>
+
+        <a href="/edit-attendance/{{ session.session_id }}/{{ username }}">
+
+            <button>
+
+                ✏ Edit Attendance
+
+            </button>
+
+        </a>
+
+    </div>
+
+    <br>
+
+    <button
+        type="button"
+        onclick="history.back()">
+
+        ← Back
+
+    </button>
+
+</div>
+
+</body>
+
+</html>

@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Faculty Dashboard</title>
+    <link rel="stylesheet" href="/static/style.css">
+
+</head>
+
+<body>
+
+<div class="dashboard">
+
+    <div class="sidebar">
+
+        <h2>👨‍🏫 Faculty Dashboard</h2>
+
+        <a href="/faculty-profile/{{username}}">
+            <div class="card">
+                <h3>👤 Profile</h3>
+                <p>View & Update Profile</p>
+            </div>
+        </a>
+
+        <a href="/faculty-assignments/{{username}}">
+            <div class="card">
+                <h3>📚 Assigned Classes</h3>
+                <p>View Assigned Subjects</p>
+            </div>
+        </a>
+
+        <a href="/faculty-attendance/{{username}}">
+            <div class="card">
+                <h3>📅 Manage Attendance</h3>
+                <p>Take, View & Edit Attendance</p>
+            </div>
+        </a>
+
+        <a href="/faculty-marks/{{username}}">
+            <div class="card">
+                <h3>📝 Marks</h3>
+                <p>Manage Student Marks</p>
+            </div>
+        </a>
+
+        <a href="/upload-material/{{username}}">
+            <div class="card">
+                <h3>📚 Course Materials</h3>
+                <p>Upload Notes / PPT / PDF</p>
+            </div>
+        </a>
+        <a href="/faculty-materials/{{username}}">
+            <div class="card">
+                <h3>📂 My Materials</h3>
+                <p>View & Delete Uploaded Files</p>
+            </div>
+        </a>
+
+        <a href="/faculty-change-password/{{username}}">
+            <div class="card">
+                <h3>🔒 Change Password</h3>
+                <p>Update Password</p>
+            </div>
+        </a>
+
+        <a href="/logout" onclick="return confirm('Are you sure you want to logout?')">
+
+            <div class="card">
+
+                <h3>🚪 Logout</h3>
+
+                <p>Sign Out</p>
+
+            </div>
+
+        </a>
+
+    </div>
+
+    <div class="main-content">
+
+        <h1>Welcome, {{faculty.full_name}}</h1>
+
+        <hr>
+
+        <br>
+
+        <div class="dashboard-info">
+
+            <div class="info-box">
+
+                <h3>Faculty ID</h3>
+
+                <p>{{faculty.faculty_id}}</p>
+
+            </div>
+            <div class="info-box">
+                <h3>Department</h3>
+                <p>{{faculty.department}}</p>
+            </div>
+            <div class="info-box">
+                <h3>Designation</h3>
+                <p>{{faculty.designation}}</p>
+            </div>
+            <div class="info-box">
+                <h3>Email</h3>
+                <p>{{faculty.email}}</p>
+            </div>
+        </div>
+        <br>
+        <div class="notice">
+            <h2>Today's Tasks</h2>
+            <ul>
+                <li>📅 Take Attendance</li>
+                <li>📝 Update Marks</li>
+                <li>📚 Upload Course Materials</li>
+            </ul>
+        </div>
+    </div>
+</div>
+</body>
+</html>

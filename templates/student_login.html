@@ -1,18 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-
     <meta charset="UTF-8">
-
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
     <title>Student Login</title>
-
     <link rel="stylesheet" href="/static/style.css">
-
 </head>
-
 <body>
 
 <div class="login-container">
@@ -20,6 +13,12 @@
     <div class="login-box">
 
         <h2>Student Login</h2>
+
+        {% if message %}
+        <div class="error-message">
+            ❌ {{ message }}
+        </div>
+        {% endif %}
 
         <form action="/login" method="post">
 
@@ -48,16 +47,15 @@
         <br>
 
         <a href="/forgot-password">
-
             Forgot Password?
-
         </a>
 
         <hr>
+
         <p>
-    Don't have an account?
-    <a href="/register">Register Here</a>
-</p>
+            Don't have an account?
+            <a href="/register">Register Here</a>
+        </p>
 
         <a href="/" class="back-home">
             ← Back to Home
@@ -68,5 +66,4 @@
 </div>
 
 </body>
-
 </html>

@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta name="viewport"
+content="width=device-width, initial-scale=1.0">
+
+<title>Edit Attendance</title>
+
+<link rel="stylesheet"
+href="/static/style.css">
+
+</head>
+
+<body>
+
+<div class="container attendance-container">
+
+<h2>✏ Edit Attendance</h2>
+
+<div class="class-details">
+
+<h3>{{session.subject}}</h3>
+
+<p><strong>Date :</strong> {{session.attendance_date}}</p>
+
+<p><strong>Semester :</strong> {{session.semester}}</p>
+
+<p><strong>Section :</strong> {{session.section}}</p>
+
+<p><strong>Slot :</strong> {{session.slot}}</p>
+
+</div>
+
+<br>
+
+<form action="/update-attendance"
+method="post">
+
+<input
+type="hidden"
+name="session_id"
+value="{{session.session_id}}"
+>
+
+<input
+type="hidden"
+name="username"
+value="{{username}}"
+>
+
+{% for student in students %}
+
+<div class="student-row">
+
+<div>
+
+<strong>
+
+{{student.student_id}}
+
+</strong>
+
+<br>
+
+{{student.student_name}}
+
+</div>
+
+<div class="attendance-status">
+
+<span class="status-text">
+
+{% if student.attendance_status=="Present" %}
+
+🟢 Present
+
+{% else %}
+
+🔴 Absent
+
+{% endif %}
+
+</span>
+
+<label class="switch">
+
+<input
+type="checkbox"
+class="attendance-toggle"
+name="present_students"
+value="{{student.student_id}}"
+
+{% if student.attendance_status=="Present" %}
+
+checked
+
+{% endif %}
+
+onchange="updateStatus(this)"
+
+>
+
+<span class="slider"></span>
+
+</label>
+
+</div>
+
+</div>
+
+{% endfor %}
+
+<br>
+
+<label>
+
+Reason for Edit
+
+</label>
+
+<textarea
+name="reason"
+rows="4"
+required
+placeholder="Enter reason for changing attendance..."
+></textarea>
+
+<br><br>
+
+<button>
+
+💾 Update Attendance
+
+</button>
+
+</form>
+
+<br>
+
+<button
+type="button"
+onclick="history.back()">
+
+← Back
+
+</button>
+
+</div>
+
+<script>
+
+function updateStatus(toggle){
+
+let status=toggle.closest(".attendance-status")
+.querySelector(".status-text");
+
+if(toggle.checked){
+
+status.innerHTML="🟢 Present";
+
+}
+
+else{
+
+status.innerHTML="🔴 Absent";
+
+}
+
+}
+
+</script>
+
+</body>
+
+</html>

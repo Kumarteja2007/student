@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Upload Course Material</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+<div class="container">
+<h2>📚 Upload Course Material</h2>
+{% if message %}
+<div class="{% if 'Successfully' in message %}success-message{% else %}error-message{% endif %}">
+{% if 'Successfully' in message %}
+✅
+{% else %}
+❌
+{% endif %}
+{{ message }}
+</div>
+{% endif %}
+<form action="/upload-material/{{username}}" method="post" enctype="multipart/form-data">
+<label><strong>Subject</strong></label>
+<select name="subject" required>
+{% for subject in subjects %}
+<option value="{{subject.subject}}">{{subject.subject}}</option>
+{% endfor %}
+</select>
+<br><br>
+<label><strong>Title</strong></label>
+<input type="text" name="title" placeholder="Example: Unit 1 Notes" required>
+<br><br>
+<label><strong>Description</strong></label>
+<textarea name="description" rows="4" placeholder="Enter short description" required></textarea>
+<br><br>
+<label><strong>Select File</strong></label>
+<input type="file" name="material" accept=".pdf,.ppt,.pptx,.doc,.docx" required>
+<br><br>
+<button type="submit">📤 Upload Material</button>
+</form>
+<br>
+<a href="/faculty-dashboard/{{username}}">
+<button type="button">← Back</button>
+</a>
+</div>
+</body>
+</html>

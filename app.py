@@ -1,16 +1,16 @@
-from fastapi import FastAPI, Request, Form
-from fastapi.responses import HTMLResponse, RedirectResponse
+from fastapi import FastAPI,Request,Form,UploadFile,File
+from fastapi.responses import HTMLResponse,RedirectResponse,FileResponse
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
 import mysql.connector
 import hashlib
+import shutil
 import os
 from dotenv import load_dotenv
 load_dotenv()
-
-app = FastAPI()
-
+app=FastAPI()
 app.mount("/static", StaticFiles(directory="static"), name="static")
+app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
 templates = Jinja2Templates(directory="templates")
 
 
@@ -218,48 +218,44 @@ def register_page(request: Request):
     )
     # ---------------- ATTENDANCE PAGE ----------------
 
-@app.get("/attendance/{username}", response_class=HTMLResponse)
-def attendance(request: Request, username: str):
+@app.get("/attendance/{username}",response_class=HTMLResponse)
+def attendance(request:Request,username:str):
 
-    db = get_db()
-    cursor = db.cursor(dictionary=True)
+    db=get_db()
+    cursor=db.cursor(dictionary=True)
 
-    cursor.execute(
-        """
-        SELECT student_id
-        FROM students
-        WHERE username=%s
-        """,
-        (username,)
-    )
+    cursor.execute("""
+    SELECT student_id
+    FROM students
+    WHERE username=%s
+    """,(username,))
 
-    student = cursor.fetchone()
+    student=cursor.fetchone()
 
-    cursor.execute(
-        """
-        SELECT *
-        FROM attendance
-        WHERE student_id=%s
-        """,
-        (student["student_id"],)
-    )
-    records = cursor.fetchall()
-    for record in records:
-        if record["total_classes"] == 0:
-            record["percentage"] = 0
-        else:
-            record["percentage"] = round(
-                (record["classes_present"] / record["total_classes"]) * 100,
-                2
-            )
+    cursor.execute("""
+    SELECT
+        s.subject,
+        s.attendance_date,
+        s.slot,
+        d.attendance_status
+    FROM attendance_details d
+    JOIN attendance_session s
+    ON d.session_id=s.session_id
+    WHERE d.student_id=%s
+    ORDER BY s.attendance_date DESC
+    """,(student["student_id"],))
+
+    records=cursor.fetchall()
+
     cursor.close()
     db.close()
+
     return templates.TemplateResponse(
         "attendance.html",
         {
-            "request": request,
-            "username": username,
-            "records": records
+            "request":request,
+            "username":username,
+            "records":records
         }
     )
     
@@ -329,25 +325,55 @@ def marks(request: Request, username: str):
 def timetable(request: Request, username: str):
     db = get_db()
     cursor = db.cursor(dictionary=True)
+
+    # Get logged-in student details
+    cursor.execute(
+        """
+        SELECT *
+        FROM students
+        WHERE username=%s
+        """,
+        (username,)
+    )
+    student = cursor.fetchone()
+
+    # Get timetable only for that student's semester and section
     cursor.execute(
         """
         SELECT *
         FROM timetable
-        ORDER BY id
-        """
+        WHERE semester=%s
+        AND section=%s
+        ORDER BY FIELD(
+            day_name,
+            'Monday',
+            'Tuesday',
+            'Wednesday',
+            'Thursday',
+            'Friday',
+            'Saturday'
+        )
+        """,
+        (
+            student["semester"],
+            student["section"]
+        )
     )
+
     timetable_data = cursor.fetchall()
+
     cursor.close()
     db.close()
+
     return templates.TemplateResponse(
         "timetable.html",
         {
             "request": request,
             "username": username,
+            "student": student,
             "timetable": timetable_data
         }
     )
-    
     # ---------------- COURSE MATERIALS ----------------
 
 from fastapi.responses import FileResponse
@@ -396,30 +422,862 @@ def download_material(material_id: int):
         filename=material["file_name"]
     )
     
-    # ---------------- NOTIFICATIONS ----------------
-
-@app.get("/notifications/{username}", response_class=HTMLResponse)
-def notifications(request: Request, username: str):
+    
+#-----------Student Marks Page-----------------
+@app.get("/student-marks/{username}", response_class=HTMLResponse)
+def student_marks(request: Request, username: str):
     db = get_db()
     cursor = db.cursor(dictionary=True)
-    cursor.execute("""
+
+    cursor.execute(
+        """
         SELECT *
-        FROM notifications
-        ORDER BY posted_on DESC
-    """)
-    notifications = cursor.fetchall()
+        FROM students
+        WHERE username=%s
+        """,
+        (username,)
+    )
+    student = cursor.fetchone()
+
+    cursor.execute(
+        """
+        SELECT
+            ms.subject,
+            ms.assessment_type,
+            md.marks,
+            am.max_marks
+        FROM marks_details md
+        JOIN marks_session ms
+            ON md.session_id=ms.session_id
+        JOIN assessment_master am
+            ON ms.assessment_type=am.assessment_name
+        WHERE md.student_id=%s
+        ORDER BY
+            ms.subject,
+            ms.session_id
+        """,
+        (student["student_id"],)
+    )
+    marks = cursor.fetchall()
     cursor.close()
     db.close()
     return templates.TemplateResponse(
-        "notifications.html",
+        "student_marks.html",
         {
             "request": request,
             "username": username,
-            "notifications": notifications
+            "student": student,
+            "marks": marks
+        }
+    )
+#------------Faculty Login Page-----------------
+@app.get("/faculty-login", response_class=HTMLResponse)
+def faculty_login_page(request: Request):
+
+    message = request.query_params.get("message", "")
+
+    return templates.TemplateResponse(
+        "faculty_login.html",
+        {
+            "request": request,
+            "message": message
+        }
+    )
+#---------------- Faculty Dashboard ----------------
+@app.get("/faculty-dashboard/{username}", response_class=HTMLResponse)
+def faculty_dashboard(
+
+    request: Request,
+    username: str
+
+):
+
+    db = get_db()
+
+    cursor = db.cursor(dictionary=True)
+
+    cursor.execute(
+        """
+        SELECT *
+        FROM faculty
+        WHERE username=%s
+        """,
+        (username,)
+    )
+
+    faculty = cursor.fetchone()
+
+    cursor.close()
+    db.close()
+
+    return templates.TemplateResponse(
+        "faculty_dashboard.html",
+        {
+            "request": request,
+            "faculty": faculty,
+            "username": username
         }
     )
     
+#----------------------Faculty Assignments Page----------------------
+@app.get("/faculty-assignments/{username}", response_class=HTMLResponse)
+def faculty_assignments(
+    request: Request,
+    username: str
+):
+
+    db = get_db()
+    cursor = db.cursor(dictionary=True)
+
+    # Get Faculty Details
+    cursor.execute(
+        """
+        SELECT *
+        FROM faculty
+        WHERE username=%s
+        """,
+        (username,)
+    )
+
+    faculty = cursor.fetchone()
+
+    # Get Assigned Classes
+    cursor.execute(
+        """
+        SELECT *
+        FROM faculty_assignments
+        WHERE faculty_id=%s
+        ORDER BY semester, section
+        """,
+        (faculty["faculty_id"],)
+    )
+
+    assignments = cursor.fetchall()
+
+    cursor.close()
+    db.close()
+
+    return templates.TemplateResponse(
+        "faculty_assignments.html",
+        {
+            "request": request,
+            "faculty": faculty,
+            "username": username,
+            "assignments": assignments
+        }
+    )
     
+#----------------------Faculty Profile Page----------------------
+@app.get("/faculty-profile/{username}", response_class=HTMLResponse)
+def faculty_profile(
+    request: Request,
+    username: str
+):
+
+    db = get_db()
+    cursor = db.cursor(dictionary=True)
+
+    cursor.execute(
+        """
+        SELECT *
+        FROM faculty
+        WHERE username=%s
+        """,
+        (username,)
+    )
+
+    faculty = cursor.fetchone()
+
+    cursor.close()
+    db.close()
+
+    return templates.TemplateResponse(
+        "faculty_profile.html",
+        {
+            "request": request,
+            "faculty": faculty,
+            "username": username
+        }
+    )
+    
+#-----------------Faculty Attendance-------------------
+@app.get("/faculty-attendance/{username}", response_class=HTMLResponse)
+def faculty_attendance(request: Request, username: str):
+
+    db = get_db()
+    cursor = db.cursor(dictionary=True)
+
+    # Get faculty details
+    cursor.execute(
+        """
+        SELECT *
+        FROM faculty
+        WHERE username=%s
+        """,
+        (username,)
+    )
+
+    faculty = cursor.fetchone()
+
+    # Get all classes assigned to this faculty
+    cursor.execute(
+        """
+        SELECT *
+        FROM faculty_assignments
+        WHERE faculty_id=%s
+        ORDER BY semester, section
+        """,
+        (faculty["faculty_id"],)
+    )
+    assignments = cursor.fetchall()
+    cursor.close()
+    db.close()
+    return templates.TemplateResponse(
+        "faculty_attendance.html",
+        {
+            "request": request,
+            "username": username,
+            "faculty": faculty,
+            "assignments": assignments
+        }
+    )
+#---------------Open Attendance Page---------------
+@app.get("/take-attendance/{assignment_id}/{username}", response_class=HTMLResponse)
+def take_attendance(
+    request: Request,
+    assignment_id: int,
+    username: str
+):
+
+    db = get_db()
+    cursor = db.cursor(dictionary=True)
+
+    # Get assignment details
+    cursor.execute(
+        """
+        SELECT *
+        FROM faculty_assignments
+        WHERE id=%s
+        """,
+        (assignment_id,)
+    )
+
+    assignment = cursor.fetchone()
+
+    # Get students of that class
+    cursor.execute(
+        """
+        SELECT
+            student_id,
+            full_name
+        FROM students
+        WHERE
+            department=%s
+            AND semester=%s
+            AND section=%s
+        ORDER BY student_id
+        """,
+        (
+            assignment["department"],
+            assignment["semester"],
+            assignment["section"]
+        )
+    )
+
+    students = cursor.fetchall()
+
+    cursor.close()
+    db.close()
+
+    return templates.TemplateResponse(
+        "take_attendance.html",
+        {
+            "request": request,
+            "username": username,
+            "assignment": assignment,
+            "students": students
+        }
+    )
+    
+#--------------Attendance Summary--------------------
+@app.get("/attendance-summary/{session_id}/{username}", response_class=HTMLResponse)
+def attendance_summary(
+    request: Request,
+    session_id: int,
+    username: str
+):
+
+    db = get_db()
+    cursor = db.cursor(dictionary=True)
+
+    cursor.execute(
+        """
+        SELECT *
+        FROM attendance_session
+        WHERE session_id=%s
+        """,
+        (session_id,)
+    )
+
+    session = cursor.fetchone()
+
+    cursor.close()
+    db.close()
+
+    return templates.TemplateResponse(
+        "attendance_summary.html",
+        {
+            "request": request,
+            "session": session,
+            "username": username
+        }
+    )
+#--------------Attendance Exists--------------------
+@app.get("/attendance-exists/{session_id}/{username}", response_class=HTMLResponse)
+def attendance_exists(
+    request: Request,
+    session_id: int,
+    username: str
+):
+
+    db = get_db()
+    cursor = db.cursor(dictionary=True)
+
+    cursor.execute(
+        """
+        SELECT *
+        FROM attendance_session
+        WHERE session_id=%s
+        """,
+        (session_id,)
+    )
+
+    session = cursor.fetchone()
+
+    cursor.close()
+    db.close()
+
+    return templates.TemplateResponse(
+        "attendance_exists.html",
+        {
+            "request": request,
+            "session": session,
+            "username": username
+        }
+    )
+#------------Attendance History-------
+@app.get("/attendance-history/{assignment_id}/{username}", response_class=HTMLResponse)
+def attendance_history(
+    request: Request,
+    assignment_id: int,
+    username: str
+):
+
+    db = get_db()
+    cursor = db.cursor(dictionary=True)
+
+    # Assignment Details
+    cursor.execute(
+        """
+        SELECT *
+        FROM faculty_assignments
+        WHERE id=%s
+        """,
+        (assignment_id,)
+    )
+
+    assignment = cursor.fetchone()
+
+    # Attendance Sessions
+    cursor.execute(
+        """
+        SELECT *
+        FROM attendance_session
+        WHERE
+            subject=%s
+            AND semester=%s
+            AND section=%s
+            AND slot=%s
+        ORDER BY attendance_date DESC
+        """,
+        (
+            assignment["subject"],
+            assignment["semester"],
+            assignment["section"],
+            assignment["slot"]
+        )
+    )
+
+    sessions = cursor.fetchall()
+
+    cursor.close()
+    db.close()
+
+    return templates.TemplateResponse(
+        "attendance_history.html",
+        {
+            "request": request,
+            "username": username,
+            "assignment": assignment,
+            "sessions": sessions
+        }
+    )
+
+#--------------View Attendance------------
+@app.get("/view-attendance/{session_id}/{username}", response_class=HTMLResponse)
+def view_attendance(
+    request: Request,
+    session_id: int,
+    username: str
+):
+
+    db = get_db()
+    cursor = db.cursor(dictionary=True)
+
+    # Attendance Session
+    cursor.execute(
+        """
+        SELECT *
+        FROM attendance_session
+        WHERE session_id=%s
+        """,
+        (session_id,)
+    )
+
+    session = cursor.fetchone()
+
+    # Student Attendance
+    cursor.execute(
+        """
+        SELECT *
+        FROM attendance_details
+        WHERE session_id=%s
+        ORDER BY student_id
+        """,
+        (session_id,)
+    )
+
+    students = cursor.fetchall()
+
+    cursor.close()
+    db.close()
+
+    return templates.TemplateResponse(
+        "view_attendance.html",
+        {
+            "request": request,
+            "session": session,
+            "students": students,
+            "username": username
+        }
+    )
+#---------Edit Attendance----------
+@app.get("/edit-attendance/{session_id}/{username}", response_class=HTMLResponse)
+def edit_attendance(
+    request: Request,
+    session_id: int,
+    username: str
+):
+
+    db = get_db()
+    cursor = db.cursor(dictionary=True)
+
+    cursor.execute(
+        """
+        SELECT *
+        FROM attendance_session
+        WHERE session_id=%s
+        """,
+        (session_id,)
+    )
+
+    session = cursor.fetchone()
+
+    cursor.execute(
+        """
+        SELECT *
+        FROM attendance_details
+        WHERE session_id=%s
+        ORDER BY student_id
+        """,
+        (session_id,)
+    )
+
+    students = cursor.fetchall()
+
+    cursor.close()
+    db.close()
+
+    return templates.TemplateResponse(
+        "edit_attendance.html",
+        {
+            "request": request,
+            "session": session,
+            "students": students,
+            "username": username
+        }
+    )
+    
+#--------------Marks---------------
+@app.get("/faculty-marks/{username}", response_class=HTMLResponse)
+def faculty_marks(
+    request: Request,
+    username: str
+):
+    db = get_db()
+    cursor = db.cursor(dictionary=True)
+    cursor.execute(
+        """
+        SELECT *
+        FROM faculty
+        WHERE username=%s
+        """,
+        (username,)
+    )
+    faculty = cursor.fetchone()
+    cursor.execute(
+        """
+        SELECT *
+        FROM faculty_assignments
+        WHERE faculty_id=%s
+        ORDER BY semester, section
+        """,
+        (faculty["faculty_id"],)
+    )
+    assignments = cursor.fetchall()
+    cursor.close()
+    db.close()
+    return templates.TemplateResponse(
+        "faculty_marks.html",
+        {
+            "request": request,
+            "username": username,
+            "faculty": faculty,
+            "assignments": assignments
+        }
+    )
+#------------Select Assignment for Marks-----------------
+@app.get("/select-assessment/{assignment_id}/{username}", response_class=HTMLResponse)
+def select_assessment(request: Request, assignment_id: int, username: str):
+    db=get_db()
+    cursor=db.cursor(dictionary=True)
+    cursor.execute(
+        """
+        SELECT *
+        FROM faculty_assignments
+        WHERE id=%s
+        """,
+        (assignment_id,)
+    )
+    assignment=cursor.fetchone()
+    cursor.execute(
+        """
+        SELECT *
+        FROM assessment_master
+        ORDER BY assessment_id
+        """
+    )
+    assessments=cursor.fetchall()
+    cursor.close()
+    db.close()
+    return templates.TemplateResponse(
+        "select_assessment.html",
+        {
+            "request":request,
+            "username":username,
+            "assignment":assignment,
+            "assessments":assessments
+        }
+    )
+#-----------------Marks Entry Page-----------------
+@app.get("/enter-marks/{assignment_id}/{username}", response_class=HTMLResponse)
+def enter_marks(
+    request: Request,
+    assignment_id: int,
+    username: str,
+    assessment_type: str
+):
+    db = get_db()
+    cursor = db.cursor(dictionary=True)
+    cursor.execute(
+        """
+        SELECT *
+        FROM faculty_assignments
+        WHERE id=%s
+        """,
+        (assignment_id,)
+    )
+    assignment = cursor.fetchone()
+    cursor.execute(
+        """
+        SELECT max_marks
+        FROM assessment_master
+        WHERE assessment_name=%s
+        """,
+        (assessment_type,)
+    )
+    assessment = cursor.fetchone()
+    cursor.execute(
+        """
+        SELECT
+            student_id,
+            full_name
+        FROM students
+        WHERE
+            department=%s
+            AND semester=%s
+            AND section=%s
+        ORDER BY student_id
+        """,
+        (
+            assignment["department"],
+            assignment["semester"],
+            assignment["section"]
+        )
+    )
+    students = cursor.fetchall()
+    cursor.close()
+    db.close()
+    return templates.TemplateResponse(
+        "enter_marks.html",
+        {
+            "request": request,
+            "username": username,
+            "assignment": assignment,
+            "students": students,
+            "assessment_type": assessment_type,
+            "max_marks": assessment["max_marks"]
+        }
+    )
+#----------------Marks Summary-----------------
+@app.get("/marks-summary/{session_id}/{username}", response_class=HTMLResponse)
+def marks_summary(request: Request, session_id: int, username: str):
+    db = get_db()
+    cursor = db.cursor(dictionary=True)
+    cursor.execute(
+        """
+        SELECT *
+        FROM marks_session
+        WHERE session_id=%s
+        """,
+        (session_id,)
+    )
+    session = cursor.fetchone()
+    cursor.close()
+    db.close()
+    return templates.TemplateResponse(
+        "marks_summary.html",
+        {
+            "request": request,
+            "session": session,
+            "username": username
+        }
+    )
+#----------------View Marks-----------------
+@app.get("/view-marks/{session_id}/{username}", response_class=HTMLResponse)
+def view_marks(request: Request, session_id: int, username: str):
+    db = get_db()
+    cursor = db.cursor(dictionary=True)
+
+    cursor.execute(
+        """
+        SELECT *
+        FROM marks_session
+        WHERE session_id=%s
+        """,
+        (session_id,)
+    )
+    session = cursor.fetchone()
+
+    cursor.execute(
+        """
+        SELECT *
+        FROM marks_details
+        WHERE session_id=%s
+        ORDER BY student_id
+        """,
+        (session_id,)
+    )
+    students = cursor.fetchall()
+    cursor.close()
+    db.close()
+    return templates.TemplateResponse(
+        "view_marks.html",
+        {
+            "request": request,
+            "session": session,
+            "students": students,
+            "username": username
+        }
+    )
+#-----------Edit Marks-----------------
+@app.get("/edit-marks/{session_id}/{username}", response_class=HTMLResponse)
+def edit_marks(request: Request, session_id: int, username: str):
+    db = get_db()
+    cursor = db.cursor(dictionary=True)
+
+    cursor.execute(
+        """
+        SELECT *
+        FROM marks_session
+        WHERE session_id=%s
+        """,
+        (session_id,)
+    )
+    session = cursor.fetchone()
+
+    cursor.execute(
+        """
+        SELECT *
+        FROM marks_details
+        WHERE session_id=%s
+        ORDER BY student_id
+        """,
+        (session_id,)
+    )
+    students = cursor.fetchall()
+
+    cursor.execute(
+        """
+        SELECT max_marks
+        FROM assessment_master
+        WHERE assessment_name=%s
+        """,
+        (session["assessment_type"],)
+    )
+    assessment = cursor.fetchone()
+
+    cursor.close()
+    db.close()
+    return templates.TemplateResponse(
+        "edit_marks.html",
+        {
+            "request": request,
+            "session": session,
+            "students": students,
+            "username": username,
+            "max_marks": assessment["max_marks"]
+        }
+    )
+    
+ #------------Upload Materials Page-----------------
+@app.get("/upload-material/{username}",response_class=HTMLResponse)
+def upload_material(request:Request,username:str):
+    message=request.query_params.get("message","")
+    db=get_db()
+    cursor=db.cursor(dictionary=True)
+    cursor.execute("""
+    SELECT subject
+    FROM faculty_assignments
+    WHERE faculty_id=(
+        SELECT faculty_id
+        FROM faculty
+        WHERE username=%s
+    )
+    """,(username,))
+    subjects=cursor.fetchall()
+    cursor.close()
+    db.close()
+    return templates.TemplateResponse(
+        "upload_material.html",
+        {
+            "request":request,
+            "username":username,
+            "subjects":subjects,
+            "message":message
+        }
+    )
+
+#----------------Faculty Materials-----------------
+@app.get("/faculty-materials/{username}",response_class=HTMLResponse)
+def faculty_materials(request:Request,username:str):
+    message=request.query_params.get("message","")
+    db=get_db()
+    cursor=db.cursor(dictionary=True)
+
+    cursor.execute("""
+    SELECT faculty_id
+    FROM faculty
+    WHERE username=%s
+    """,(username,))
+    faculty=cursor.fetchone()
+
+    cursor.execute("""
+    SELECT *
+    FROM course_materials
+    WHERE faculty_id=%s
+    ORDER BY uploaded_on DESC
+    """,(faculty["faculty_id"],))
+
+    materials=cursor.fetchall()
+
+    cursor.close()
+    db.close()
+
+    return templates.TemplateResponse(
+        "faculty_materials.html",
+        {
+            "request":request,
+            "username":username,
+            "materials":materials,
+            "message":message
+        }
+    )
+
+#---------Delete Materials-----------------
+@app.get("/delete-material/{id}/{username}")
+def delete_material(id:int,username:str):
+    db=get_db()
+    cursor=db.cursor(dictionary=True)
+    cursor.execute("SELECT file_path FROM course_materials WHERE id=%s",(id,))
+    material=cursor.fetchone()
+    if material and os.path.exists(material["file_path"]):
+        os.remove(material["file_path"])
+    cursor.execute("DELETE FROM course_materials WHERE id=%s",(id,))
+    db.commit()
+    cursor.close()
+    db.close()
+    return RedirectResponse(url=f"/faculty-materials/{username}?message=Course Material Deleted Successfully", status_code=303)
+#--------Edit Materials-----------------
+@app.get("/edit-material/{id}/{username}",response_class=HTMLResponse)
+def edit_material(request:Request,id:int,username:str):
+    db=get_db()
+    cursor=db.cursor(dictionary=True)
+    cursor.execute("SELECT * FROM course_materials WHERE id=%s",(id,))
+    material=cursor.fetchone()
+    cursor.close()
+    db.close()
+    return templates.TemplateResponse("edit_material.html",{"request":request,"username":username,"material":material})
+
+
+#------------------Download Materials-----------------
+@app.get("/download/{id}")
+def download_material(id:int):
+    db=get_db()
+    cursor=db.cursor(dictionary=True)
+    cursor.execute("""
+    SELECT file_name,file_path
+    FROM course_materials
+    WHERE id=%s
+    """,(id,))
+    material=cursor.fetchone()
+    cursor.close()
+    db.close()
+    return FileResponse(path=material["file_path"],filename=material["file_name"],media_type="application/octet-stream")
+
+#------------Faculty Change Password Page-----------------
+@app.get("/faculty-change-password/{username}",response_class=HTMLResponse)
+def faculty_change_password(request:Request,username:str):
+    message=request.query_params.get("message","")
+    return templates.TemplateResponse(
+        "faculty_change_password.html",
+        {
+            "request":request,
+            "username":username,
+            "message":message
+        }
+    )
+
 # ---------------- REGISTER ----------------
 
 @app.post("/register")
@@ -715,7 +1573,818 @@ def reset_password(
         status_code=303
     )
 
+#----------Faculty Login Verification-----------------
+@app.post("/faculty-login")
+def faculty_login(
 
+    username: str = Form(...),
+    password: str = Form(...)
+
+):
+
+    encrypted = hash_password(password)
+
+    db = get_db()
+
+    cursor = db.cursor(dictionary=True)
+
+    cursor.execute(
+        """
+        SELECT * FROM faculty
+        WHERE username=%s
+        AND password=%s
+        """,
+        (
+            username,
+            encrypted
+        )
+    )
+    faculty = cursor.fetchone()
+    cursor.close()
+    db.close()
+    if faculty:
+        return RedirectResponse(
+            url=f"/faculty-dashboard/{username}",
+            status_code=303
+        )
+    return RedirectResponse(
+        url="/faculty-login?message=Invalid Username or Password",
+        status_code=303
+    )
+#----------Faculty Profile Update-----------------
+@app.post("/update-faculty-profile")
+def update_faculty_profile(
+
+    username: str = Form(...),
+    email: str = Form(...),
+    full_name: str = Form(...),
+    mobile: str = Form(...)
+
+):
+
+    db = get_db()
+    cursor = db.cursor()
+
+    cursor.execute(
+        """
+        UPDATE faculty
+
+        SET
+
+        email=%s,
+
+        full_name=%s,
+
+        mobile=%s
+
+        WHERE username=%s
+        """,
+        (
+            email,
+            full_name,
+            mobile,
+            username
+        )
+    )
+    db.commit()
+    cursor.close()
+    db.close()
+    return RedirectResponse(
+        url=f"/faculty-profile/{username}",
+        status_code=303
+    )
+    
+from datetime import date
+
+@app.post("/save-attendance")
+def save_attendance(
+
+    assignment_id: int = Form(...),
+    username: str = Form(...),
+    attendance_date: str = Form(...),
+    present_students: list[str] = Form([])
+
+):
+
+    db = get_db()
+    cursor = db.cursor(dictionary=True)
+
+    # -----------------------------
+    # Get Faculty Details
+    # -----------------------------
+
+    cursor.execute(
+        """
+        SELECT *
+        FROM faculty
+        WHERE username=%s
+        """,
+        (username,)
+    )
+
+    faculty = cursor.fetchone()
+
+    # -----------------------------
+    # Get Assignment Details
+    # -----------------------------
+
+    cursor.execute(
+        """
+        SELECT *
+        FROM faculty_assignments
+        WHERE id=%s
+        """,
+        (assignment_id,)
+    )
+
+    assignment = cursor.fetchone()
+
+    # -----------------------------
+    # Get Students
+    # -----------------------------
+
+    cursor.execute(
+        """
+        SELECT
+            student_id,
+            full_name
+        FROM students
+        WHERE
+            department=%s
+            AND semester=%s
+            AND section=%s
+        ORDER BY student_id
+        """,
+        (
+            assignment["department"],
+            assignment["semester"],
+            assignment["section"]
+        )
+    )
+
+    students = cursor.fetchall()
+
+    total_students = len(students)
+    present_count = len(present_students)
+    absent_count = total_students - present_count
+    
+    # -----------------------------
+    # Check Existing Attendance
+    # -----------------------------
+
+    cursor.execute(
+        """
+        SELECT session_id
+        FROM attendance_session
+        WHERE
+            subject=%s
+            AND semester=%s
+            AND section=%s
+            AND slot=%s
+            AND attendance_date=%s
+        """,
+        (
+            assignment["subject"],
+            assignment["semester"],
+            assignment["section"],
+            assignment["slot"],
+            attendance_date
+        )
+    )
+
+    existing = cursor.fetchone()
+
+    if existing:
+
+        cursor.close()
+        db.close()
+
+        return RedirectResponse(
+            url=f"/attendance-exists/{existing['session_id']}/{username}",
+            status_code=303
+        )
+
+    # -----------------------------
+    # Create Attendance Session
+    # -----------------------------
+
+    cursor.execute(
+        """
+        INSERT INTO attendance_session(
+
+            faculty_id,
+            subject,
+            semester,
+            section,
+            slot,
+            attendance_date,
+            total_students,
+            present_students,
+            absent_students
+
+        )
+
+        VALUES(
+
+            %s,%s,%s,%s,%s,%s,%s,%s,%s
+
+        )
+        """,
+        (
+            faculty["faculty_id"],
+            assignment["subject"],
+            assignment["semester"],
+            assignment["section"],
+            assignment["slot"],
+            attendance_date,
+            total_students,
+            present_count,
+            absent_count
+        )
+    )
+
+    db.commit()
+
+    session_id = cursor.lastrowid
+
+    # -----------------------------
+    # Save Student Attendance
+    # -----------------------------
+
+    for student in students:
+
+        if student["student_id"] in present_students:
+
+            status = "Present"
+
+        else:
+
+            status = "Absent"
+
+        cursor.execute(
+            """
+            INSERT INTO attendance_details(
+
+                session_id,
+                student_id,
+                student_name,
+                attendance_status
+
+            )
+
+            VALUES(
+
+                %s,%s,%s,%s
+
+            )
+            """,
+            (
+                session_id,
+                student["student_id"],
+                student["full_name"],
+                status
+            )
+        )
+
+    db.commit()
+
+    cursor.close()
+    db.close()
+
+    return RedirectResponse(
+
+        url=f"/attendance-summary/{session_id}/{username}",
+
+        status_code=303
+
+    )
+
+    
+from fastapi import Form
+from fastapi.responses import RedirectResponse
+
+@app.post("/update-attendance")
+def update_attendance(
+    session_id: int = Form(...),
+    username: str = Form(...),
+    reason: str = Form(...),
+    present_students: list[str] = Form([])
+):
+
+    db = get_db()
+    cursor = db.cursor(dictionary=True)
+
+    # -----------------------------
+    # Get existing attendance
+    # -----------------------------
+    cursor.execute(
+        """
+        SELECT *
+        FROM attendance_details
+        WHERE session_id=%s
+        """,
+        (session_id,)
+    )
+
+    students = cursor.fetchall()
+
+    present = 0
+    absent = 0
+
+    # -----------------------------
+    # Update each student
+    # -----------------------------
+    for student in students:
+
+        old_status = student["attendance_status"]
+
+        if student["student_id"] in present_students:
+            new_status = "Present"
+            present += 1
+        else:
+            new_status = "Absent"
+            absent += 1
+
+        # Update attendance
+        cursor.execute(
+            """
+            UPDATE attendance_details
+            SET attendance_status=%s
+            WHERE id=%s
+            """,
+            (
+                new_status,
+                student["id"]
+            )
+        )
+
+        # Save edit log only if changed
+        if old_status != new_status:
+
+            cursor.execute(
+                """
+                INSERT INTO attendance_edit_log(
+
+                    session_id,
+                    student_id,
+                    old_status,
+                    new_status,
+                    edited_by,
+                    reason
+
+                )
+
+                VALUES(%s,%s,%s,%s,%s,%s)
+                """,
+                (
+                    session_id,
+                    student["student_id"],
+                    old_status,
+                    new_status,
+                    username,
+                    reason
+                )
+            )
+
+    # -----------------------------
+    # Update session summary
+    # -----------------------------
+    cursor.execute(
+        """
+        UPDATE attendance_session
+        SET
+            present_students=%s,
+            absent_students=%s
+        WHERE session_id=%s
+        """,
+        (
+            present,
+            absent,
+            session_id
+        )
+    )
+
+    db.commit()
+
+    cursor.close()
+    db.close()
+
+    return RedirectResponse(
+        url=f"/attendance-summary/{session_id}/{username}",
+        status_code=303
+    )
+#-------------Save Marks-----------------
+@app.post("/save-marks")
+def save_marks(
+    assignment_id: int = Form(...),
+    username: str = Form(...),
+    assessment_type: str = Form(...),
+    student_ids: list[str] = Form(...),
+    student_names: list[str] = Form(...),
+    marks: list[float] = Form(...)
+):
+    db = get_db()
+    cursor = db.cursor(dictionary=True)
+    cursor.execute(
+        """
+        SELECT *
+        FROM faculty
+        WHERE username=%s
+        """,
+        (username,)
+    )
+    faculty = cursor.fetchone()
+    cursor.execute(
+        """
+        SELECT *
+        FROM faculty_assignments
+        WHERE id=%s
+        """,
+        (assignment_id,)
+    )
+    assignment = cursor.fetchone()
+    cursor.execute(
+        """
+        SELECT session_id
+        FROM marks_session
+        WHERE subject=%s
+        AND department=%s
+        AND semester=%s
+        AND section=%s
+        AND assessment_type=%s
+        """,
+        (
+            assignment["subject"],
+            assignment["department"],
+            assignment["semester"],
+            assignment["section"],
+            assessment_type
+        )
+    )
+    existing = cursor.fetchone()
+    if existing:
+        cursor.close()
+        db.close()
+        return RedirectResponse(
+            url=f"/marks-exists/{existing['session_id']}/{username}",
+            status_code=303
+        )
+    highest = max(marks)
+    lowest = min(marks)
+    average = round(sum(marks) / len(marks), 2)
+    cursor.execute(
+        """
+        SELECT max_marks
+        FROM assessment_master
+        WHERE assessment_name=%s
+        """,
+        (assessment_type,)
+    )
+    assessment = cursor.fetchone()
+    pass_mark = assessment["max_marks"] * 0.4
+    passed = len([m for m in marks if m >= pass_mark])
+    pass_percentage = round((passed / len(marks)) * 100, 2)
+    cursor.execute(
+        """
+        INSERT INTO marks_session(
+            faculty_id,
+            subject,
+            department,
+            semester,
+            section,
+            assessment_type,
+            total_students,
+            highest_marks,
+            lowest_marks,
+            average_marks,
+            pass_percentage
+        )
+        VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
+        """,
+        (
+            faculty["faculty_id"],
+            assignment["subject"],
+            assignment["department"],
+            assignment["semester"],
+            assignment["section"],
+            assessment_type,
+            len(student_ids),
+            highest,
+            lowest,
+            average,
+            pass_percentage
+        )
+    )
+    db.commit()
+    session_id = cursor.lastrowid
+    for i in range(len(student_ids)):
+        cursor.execute(
+            """
+            INSERT INTO marks_details(
+                session_id,
+                student_id,
+                student_name,
+                marks
+            )
+            VALUES(%s,%s,%s,%s)
+            """,
+            (
+                session_id,
+                student_ids[i],
+                student_names[i],
+                marks[i]
+            )
+        )
+    db.commit()
+    cursor.close()
+    db.close()
+    return RedirectResponse(
+        url=f"/marks-summary/{session_id}/{username}",
+        status_code=303
+    )
+    
+#-----------Marks Entry Exists-----------------
+@app.get("/marks-exists/{session_id}/{username}", response_class=HTMLResponse)
+def marks_exists(
+    request: Request,
+    session_id: int,
+    username: str
+):
+    db = get_db()
+    cursor = db.cursor(dictionary=True)
+
+    cursor.execute("""
+        SELECT *
+        FROM marks_session
+        WHERE session_id=%s
+    """, (session_id,))
+
+    session = cursor.fetchone()
+
+    cursor.close()
+    db.close()
+
+    return templates.TemplateResponse(
+        "marks_exists.html",
+        {
+            "request": request,
+            "session": session,
+            "username": username
+        }
+    )
+#---------Update Marks-----------------
+@app.post("/update-marks")
+def update_marks(
+    session_id: int = Form(...),
+    username: str = Form(...),
+    student_ids: list[str] = Form(...),
+    marks: list[float] = Form(...),
+    reason: str = Form(...)
+):
+    db = get_db()
+    cursor = db.cursor(dictionary=True)
+    cursor.execute(
+        """
+        SELECT *
+        FROM marks_details
+        WHERE session_id=%s
+        ORDER BY student_id
+        """,
+        (session_id,)
+    )
+    old_marks = cursor.fetchall()
+    for i in range(len(old_marks)):
+        old = old_marks[i]["marks"]
+        new = marks[i]
+        cursor.execute(
+            """
+            UPDATE marks_details
+            SET marks=%s
+            WHERE id=%s
+            """,
+            (
+                new,
+                old_marks[i]["id"]
+            )
+        )
+        if old != new:
+            cursor.execute(
+                """
+                INSERT INTO marks_edit_log(
+                    session_id,
+                    student_id,
+                    old_marks,
+                    new_marks,
+                    edited_by,
+                    reason
+                )
+                VALUES(%s,%s,%s,%s,%s,%s)
+                """,
+                (
+                    session_id,
+                    student_ids[i],
+                    old,
+                    new,
+                    username,
+                    reason
+                )
+            )
+    highest = max(marks)
+    lowest = min(marks)
+    average = round(sum(marks) / len(marks), 2)
+    cursor.execute(
+        """
+        SELECT assessment_type
+        FROM marks_session
+        WHERE session_id=%s
+        """,
+        (session_id,)
+    )
+    session = cursor.fetchone()
+    cursor.execute(
+        """
+        SELECT max_marks
+        FROM assessment_master
+        WHERE assessment_name=%s
+        """,
+        (session["assessment_type"],)
+    )
+    assessment = cursor.fetchone()
+    pass_mark = assessment["max_marks"] * 0.4
+    passed = len([m for m in marks if m >= pass_mark])
+    pass_percentage = round((passed / len(marks)) * 100, 2)
+    cursor.execute(
+        """
+        UPDATE marks_session
+        SET
+            highest_marks=%s,
+            lowest_marks=%s,
+            average_marks=%s,
+            pass_percentage=%s
+        WHERE session_id=%s
+        """,
+        (
+            highest,
+            lowest,
+            average,
+            pass_percentage,
+            session_id
+        )
+    )
+    db.commit()
+    cursor.close()
+    db.close()
+    return RedirectResponse(
+        url=f"/marks-summary/{session_id}/{username}",
+        status_code=303
+    )
+
+#--------------Upload Materials Post-----------------
+@app.post("/upload-material/{username}")
+async def upload_material_post(username:str,subject:str=Form(...),title:str=Form(...),description:str=Form(...),material:UploadFile=File(...)):
+    os.makedirs("uploads/materials",exist_ok=True)
+    file_path=f"uploads/materials/{material.filename}"
+    with open(file_path,"wb") as buffer:
+        shutil.copyfileobj(material.file,buffer)
+    db=get_db()
+    cursor=db.cursor()
+    cursor.execute("""
+    SELECT faculty_id
+    FROM faculty
+    WHERE username=%s
+    """,(username,))
+    faculty=cursor.fetchone()
+    faculty_id=faculty[0]
+    cursor.execute("""
+    INSERT INTO course_materials(faculty_id,subject,title,description,file_name,file_path)
+    VALUES(%s,%s,%s,%s,%s,%s)
+    """,(faculty_id,subject,title,description,material.filename,file_path))
+    db.commit()
+    cursor.close()
+    db.close()
+    return RedirectResponse( url=f"/upload-material/{username}?message=Course Material Uploaded Successfully", status_code=303
+)
+
+#----------Edit material post-----------------
+@app.post("/edit-material/{id}/{username}")
+async def update_material(
+    id:int,
+    username:str,
+    title:str=Form(...),
+    description:str=Form(...),
+    material:UploadFile=File(None)
+):
+    db=get_db()
+    cursor=db.cursor(dictionary=True)
+
+    cursor.execute(
+        "SELECT * FROM course_materials WHERE id=%s",
+        (id,)
+    )
+
+    old=cursor.fetchone()
+
+    file_name=old["file_name"]
+    file_path=old["file_path"]
+
+    if material and material.filename!="":
+
+        if os.path.exists(file_path):
+            os.remove(file_path)
+
+        os.makedirs("uploads/materials",exist_ok=True)
+
+        file_path=f"uploads/materials/{material.filename}"
+
+        with open(file_path,"wb") as buffer:
+            shutil.copyfileobj(material.file,buffer)
+
+        file_name=material.filename
+
+    cursor.execute("""
+    UPDATE course_materials
+    SET
+        title=%s,
+        description=%s,
+        file_name=%s,
+        file_path=%s
+    WHERE id=%s
+    """,
+    (
+        title,
+        description,
+        file_name,
+        file_path,
+        id
+    ))
+
+    db.commit()
+
+    cursor.close()
+    db.close()
+
+    return RedirectResponse(
+        url=f"/faculty-materials/{username}?message=Course Material Updated Successfully",
+        status_code=303
+    )
+
+#--------------------Verify Faculty Password-----------------
+@app.post("/faculty-change-password/{username}")
+def update_faculty_password(
+    username:str,
+    current_password:str=Form(...),
+    new_password:str=Form(...),
+    confirm_password:str=Form(...)
+):
+    if new_password!=confirm_password:
+        return RedirectResponse(
+            url=f"/faculty-change-password/{username}?message=New Password and Confirm Password do not match",
+            status_code=303
+        )
+
+    db=get_db()
+    cursor=db.cursor(dictionary=True)
+
+    cursor.execute(
+        """
+        SELECT *
+        FROM faculty
+        WHERE username=%s
+        """,
+        (username,)
+    )
+
+    faculty=cursor.fetchone()
+
+    if faculty["password"]!=hash_password(current_password):
+        cursor.close()
+        db.close()
+        return RedirectResponse(
+            url=f"/faculty-change-password/{username}?message=Current Password is incorrect",
+            status_code=303
+        )
+
+    cursor.execute(
+        """
+        UPDATE faculty
+        SET password=%s
+        WHERE username=%s
+        """,
+        (
+            hash_password(new_password),
+            username
+        )
+    )
+
+    db.commit()
+
+    cursor.close()
+    db.close()
+
+    return RedirectResponse(
+        url=f"/faculty-change-password/{username}?message=Password Changed Successfully",
+        status_code=303
+    )
 # ---------------- LOGOUT ----------------
 
 @app.get("/logout")
@@ -725,3 +2394,4 @@ def logout():
         url="/",
         status_code=303
     )
+    

@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>My Course Materials</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+<div class="container">
+<h2>📚 My Course Materials</h2>
+{% if message %}
+<div class="{% if 'Successfully' in message %}success-message{% else %}error-message{% endif %}">
+{% if 'Successfully' in message %}
+✅
+{% else %}
+❌
+{% endif %}
+{{ message }}
+</div>
+{% endif %}
+<table>
+<tr>
+<th>Subject</th>
+<th>Title</th>
+<th>Description</th>
+<th>File</th>
+<th>Uploaded On</th>
+<th>Action</th>
+</tr>
+{% for row in materials %}
+<tr>
+<td>{{row.subject}}</td>
+<td>{{row.title}}</td>
+<td>{{row.description}}</td>
+<td>{{row.file_name}}</td>
+<td>{{row.uploaded_on}}</td>
+<td>
+<a href="/download/{{row.id}}"><button>⬇ Download</button></a>
+<a href="/edit-material/{{row.id}}/{{username}}"><button>✏ Edit</button></a>
+<a href="/delete-material/{{row.id}}/{{username}}" onclick="return confirm('Delete this material?')"><button>🗑 Delete</button></a>
+</td>
+</td>
+</tr>
+{% endfor %}
+</table>
+<br>
+<a href="/faculty-dashboard/{{username}}">
+<button>← Back</button>
+</a>
+</div>
+</body>
+</html>

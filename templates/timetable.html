@@ -8,29 +8,55 @@
 </head>
 <body>
 <div class="container">
-    <h2>Weekly Timetable</h2>
+    <h2>📅 Weekly Timetable</h2>
+        <div class="timetable-info">
+            <p><strong>Department:</strong> {{ student.department }}</p>
+            <p><strong>Semester:</strong> {{ student.semester }}</p>
+            <p><strong>Section:</strong> {{ student.section }}</p>
+            <p><strong>Academic Year:</strong> 2026-27</p>
+        </div>
     <table>
         <tr>
             <th>Day</th>
-            <th>Period 1</th>
-            <th>Period 2</th>
-            <th>Period 3</th>
-            <th>Period 4</th>
-            <th>Period 5</th>
-            <th>Period 6</th>
+            <th>09:00-09:50</th>
+            <th>09:50-10:40</th>
+            <th>10:40-11:00</th>
+            <th>11:00-11:50</th>
+            <th>11:50-12:40</th>
+            <th>12:40-01:30</th>
+            <th>01:30-02:20</th>
+            <th>02:20-03:10</th>
         </tr>
         {% for row in timetable %}
         <tr>
-            <td>{{ row.day_name }}</td>
+            <td><strong>{{ row.day_name }}</strong></td>
             <td>{{ row.period1 }}</td>
             <td>{{ row.period2 }}</td>
+            <td style="background:#fff3cd;font-weight:bold;">
+                ☕ Break
+            </td>
             <td>{{ row.period3 }}</td>
             <td>{{ row.period4 }}</td>
+            <td style="background:#d4edda;font-weight:bold;">
+                🍴 Lunch
+            </td>
             <td>{{ row.period5 }}</td>
             <td>{{ row.period6 }}</td>
         </tr>
         {% endfor %}
     </table>
+    <br>
+    <h3>📖 Legend</h3>
+    <p>
+    DS = Data Structures |
+    DBMS = Database Management Systems |
+    OS = Operating Systems |
+    CN = Computer Networks |
+    DAA = Design and Analysis of Algorithms |
+    AI = Artificial Intelligence |
+    DE = Digital Electronics |
+    SS = Signals and Systems
+    </p>
     <br>
     <a href="/student-dashboard/{{username}}">
         <button type="button">

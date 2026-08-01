@@ -3,10 +3,8 @@
 <head>
     <title>Course Materials</title>
     <meta charset="UTF-8">
-    <meta name="viewport"
-          content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet"
-          href="/static/style.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
 <div class="container">
@@ -14,13 +12,17 @@
     <table>
         <tr>
             <th>Subject</th>
-            <th>File Name</th>
+            <th>Title</th>
+            <th>Description</th>
+            <th>File</th>
             <th>Uploaded On</th>
             <th>Download</th>
         </tr>
         {% for row in materials %}
         <tr>
             <td>{{ row.subject }}</td>
+            <td>{{ row.title }}</td>
+            <td>{{ row.description }}</td>
             <td>{{ row.file_name }}</td>
             <td>{{ row.uploaded_on }}</td>
             <td>

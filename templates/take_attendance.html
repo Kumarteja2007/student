@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Take Attendance</title>
+<link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+
+<div class="container attendance-container">
+
+<h2>📅 Take Attendance</h2>
+
+<div class="class-details">
+<h3>{{ assignment.subject }}</h3>
+<p><strong>Department :</strong> {{ assignment.department }}</p>
+<p><strong>Semester :</strong> {{ assignment.semester }}</p>
+<p><strong>Section :</strong> {{ assignment.section }}</p>
+<p><strong>Slot :</strong> {{ assignment.slot }}</p>
+</div>
+
+<br>
+
+<form action="/save-attendance" method="post">
+
+<input type="hidden" name="assignment_id" value="{{ assignment.id }}">
+<input type="hidden" name="username" value="{{ username }}">
+
+<label><strong>Attendance Date</strong></label>
+
+<input
+type="date"
+id="attendanceDate"
+name="attendance_date"
+required
+>
+
+<br><br>
+
+<input
+type="text"
+id="searchStudent"
+placeholder="🔍 Search Student..."
+onkeyup="searchStudent()"
+>
+
+<br><br>
+
+<label>
+<input
+type="checkbox"
+id="showAbsent"
+onchange="filterAbsent()"
+>
+Show Only Absent
+</label>
+
+<br><br>
+
+<div class="summary">
+
+<div>
+Total Students
+<h2 id="totalCount">{{ students|length }}</h2>
+</div>
+
+<div>
+Present
+<h2 id="presentCount">0</h2>
+</div>
+
+<div>
+Absent
+<h2 id="absentCount">{{ students|length }}</h2>
+</div>
+
+<div>
+Attendance %
+<h2 id="percentage">0%</h2>
+</div>
+
+</div>
+
+<br>
+
+<button type="button" onclick="makeAllPresent()">
+✅ Make All Present
+</button>
+
+<button type="button" onclick="makeAllAbsent()">
+❌ Make All Absent
+</button>
+
+<br><br>
+
+{% for student in students %}
+
+<div class="student-row">
+
+<div>
+<strong>{{ student.student_id }}</strong>
+<br>
+{{ student.full_name }}
+</div>
+
+<div class="attendance-status">
+
+<span class="status-text">
+🔴 Absent
+</span>
+
+<label class="switch">
+
+<input
+type="checkbox"
+class="attendance-toggle"
+name="present_students"
+value="{{ student.student_id }}"
+onchange="updateCount();updateStatus(this)"
+>
+
+<span class="slider"></span>
+
+</label>
+
+</div>
+
+</div>
+
+{% endfor %}
+
+<br>
+
+<button type="submit">
+💾 Save Today's Attendance
+</button>
+
+</form>
+
+<br>
+
+<a href="/faculty-attendance/{{username}}">
+<button type="button">
+← Back
+</button>
+</a>
+
+</div>
+
+<script>
+
+document.getElementById("attendanceDate").valueAsDate=new Date();
+
+function updateCount(){
+
+let toggles=document.querySelectorAll(".attendance-toggle");
+
+let present=0;
+
+toggles.forEach(function(toggle){
+
+if(toggle.checked){
+
+present++;
+
+}
+
+});
+
+let total=toggles.length;
+
+let absent=total-present;
+
+let percentage=((present/total)*100).toFixed(2);
+
+document.getElementById("presentCount").innerHTML=present;
+
+document.getElementById("absentCount").innerHTML=absent;
+
+document.getElementById("percentage").innerHTML=percentage+"%";
+
+}
+
+function updateStatus(toggle){
+
+let status=toggle.closest(".attendance-status").querySelector(".status-text");
+
+if(toggle.checked){
+
+status.innerHTML="🟢 Present";
+
+}
+else{
+
+status.innerHTML="🔴 Absent";
+
+}
+
+}
+
+function searchStudent(){
+
+let input=document.getElementById("searchStudent").value.toLowerCase();
+
+let rows=document.querySelectorAll(".student-row");
+
+rows.forEach(function(row){
+
+if(row.innerText.toLowerCase().includes(input)){
+
+row.style.display="flex";
+
+}
+else{
+
+row.style.display="none";
+
+}
+
+});
+
+}
+
+function filterAbsent(){
+
+let checked=document.getElementById("showAbsent").checked;
+
+let rows=document.querySelectorAll(".student-row");
+
+let toggles=document.querySelectorAll(".attendance-toggle");
+
+for(let i=0;i<rows.length;i++){
+
+if(checked){
+
+if(toggles[i].checked){
+
+rows[i].style.display="none";
+
+}
+else{
+
+rows[i].style.display="flex";
+
+}
+
+}
+else{
+
+rows[i].style.display="flex";
+
+}
+
+}
+
+}
+
+function makeAllPresent(){
+
+let toggles=document.querySelectorAll(".attendance-toggle");
+
+toggles.forEach(function(toggle){
+
+toggle.checked=true;
+
+updateStatus(toggle);
+
+});
+
+updateCount();
+
+}
+
+function makeAllAbsent(){
+
+let toggles=document.querySelectorAll(".attendance-toggle");
+
+toggles.forEach(function(toggle){
+
+toggle.checked=false;
+
+updateStatus(toggle);
+
+});
+
+updateCount();
+
+}
+
+</script>
+
+</body>
+</html>

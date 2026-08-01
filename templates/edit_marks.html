@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Marks</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+<div class="container">
+    <h2>✏ Edit Marks</h2>
+    <div class="assignment-card">
+        <h3>{{ session.subject }}</h3>
+        <p><strong>Assessment :</strong> {{ session.assessment_type }}</p>
+        <p><strong>Maximum Marks :</strong> {{ max_marks }}</p>
+        <p><strong>Department :</strong> {{ session.department }}</p>
+        <p><strong>Semester :</strong> {{ session.semester }}</p>
+        <p><strong>Section :</strong> {{ session.section }}</p>
+    </div>
+    <br>
+    <form action="/update-marks" method="post">
+        <input type="hidden" name="session_id" value="{{ session.session_id }}">
+        <input type="hidden" name="username" value="{{ username }}">
+        <table>
+            <tr>
+                <th>Student ID</th>
+                <th>Student Name</th>
+                <th>Marks</th>
+            </tr>
+            {% for student in students %}
+            <tr>
+                <td>
+                    {{ student.student_id }}
+                    <input type="hidden" name="student_ids" value="{{ student.student_id }}">
+                </td>
+                <td>{{ student.student_name }}</td>
+                <td>
+                    <input
+                        type="number"
+                        name="marks"
+                        min="0"
+                        max="{{ max_marks }}"
+                        value="{{ student.marks }}"
+                        required
+                    >
+                </td>
+            </tr>
+            {% endfor %}
+        </table>
+        <br>
+        <label><strong>Reason for Edit</strong></label>
+        <textarea
+            name="reason"
+            rows="4"
+            required
+            placeholder="Enter reason for editing marks..."
+        ></textarea>
+        <br><br>
+        <button type="submit">
+            💾 Update Marks
+        </button>
+    </form>
+    <br>
+    <button type="button" onclick="history.back()">
+        ← Back
+    </button>
+</div>
+</body>
+</html>

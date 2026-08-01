@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Attendance Summary</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+<div class="container attendance-summary">
+    <div class="success-box">
+        <h1>✅ Attendance Saved Successfully</h1>
+    </div>
+    <br>
+    <div class="summary-card">
+        <h2>{{ session.subject }}</h2>
+        <hr>
+        <p><strong>Date :</strong> {{ session.attendance_date }}</p>
+        <p><strong>Semester :</strong> {{ session.semester }}</p>
+        <p><strong>Section :</strong> {{ session.section }}</p>
+        <p><strong>Slot :</strong> {{ session.slot }}</p>
+    </div>
+    <br>
+    <div class="summary-grid">
+        <div class="summary-item">
+            <h3>Total Students</h3>
+            <h1>{{ session.total_students }}</h1>
+        </div>
+        <div class="summary-item">
+            <h3>🟢 Present</h3>
+            <h1>{{ session.present_students }}</h1>
+        </div>
+        <div class="summary-item">
+            <h3>🔴 Absent</h3>
+            <h1>{{ session.absent_students }}</h1>
+        </div>
+        <div class="summary-item">
+            <h3>Attendance %</h3>
+            <h1>
+                {{ "%.2f"|format((session.present_students/session.total_students)*100) }}%
+            </h1>
+        </div>
+    </div>
+    <br>
+    <div class="summary-buttons">
+        <a href="/view-attendance/{{ session.session_id }}/{{ username }}">
+            <button>
+                👁 View Attendance
+            </button>
+        </a>
+        <a href="/edit-attendance/{{ session.session_id }}/{{ username }}">
+            <button>
+                ✏ Edit Attendance
+            </button>
+        </a>
+    </div>
+    <br>
+    <a href="/faculty-dashboard/{{ username }}">
+        <button>
+            🏠 Back to Dashboard
+        </button>
+    </a>
+</div>
+
+</body>
+
+</html>

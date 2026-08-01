@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport"
+content="width=device-width, initial-scale=1.0">
+<title>Attendance History</title>
+<link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+<div class="container">
+<h2>Attendance History</h2>
+<h3>{{assignment.subject}}</h3>
+<p>
+Semester :
+{{assignment.semester}}
+|
+Section :
+{{assignment.section}}
+|
+Slot :
+{{assignment.slot}}
+</p>
+<hr>
+{% if sessions %}
+{% for row in sessions %}
+<div class="history-card">
+<h3>
+📅 {{row.attendance_date}}
+</h3>
+<p>
+👨‍🎓 Total :
+{{row.total_students}}
+</p>
+<p>
+🟢 Present :
+{{row.present_students}}
+</p>
+<p>
+🔴 Absent :
+{{row.absent_students}}
+</p>
+<p>
+📊 Attendance :
+{{ "%.2f"|format((row.present_students/row.total_students)*100) }}%
+</p>
+<div class="history-buttons">
+<a href="/view-attendance/{{row.session_id}}/{{username}}">
+<button>
+👁 View
+</button>
+</a>
+<a href="/edit-attendance/{{row.session_id}}/{{username}}">
+<button>
+✏ Edit
+</button>
+</a>
+</div>
+</div>
+{% endfor %}
+{% else %}
+<h3>
+No Attendance Found
+</h3>
+{% endif %}
+<br>
+<a href="/faculty-attendance/{{username}}">
+<button>
+← Back
+</button>
+</a>
+</div>
+</body>
+</html>

@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Assigned Classes</title>
+
+    <link rel="stylesheet" href="/static/style.css">
+
+</head>
+
+<body>
+
+<div class="container">
+
+    <h2>📚 Assigned Classes</h2>
+
+    {% if assignments %}
+
+        {% for row in assignments %}
+
+        <div class="assignment-card">
+
+            <h3>{{ row.subject }}</h3>
+
+            <p><strong>Semester :</strong> {{ row.semester }}</p>
+
+            <p><strong>Section :</strong> {{ row.section }}</p>
+
+            <p><strong>Slot :</strong> {{ row.slot }}</p>
+
+            <p><strong>Total Students :</strong> {{ row.total_students }}</p>
+
+            <div class="assignment-buttons">
+
+                <a href="/faculty-attendance/{{username}}?assignment={{row.id}}">
+                    <button type="button">
+                        📅 Attendance
+                    </button>
+                </a>
+
+                <a href="/faculty-marks/{{username}}?assignment={{row.id}}">
+                    <button type="button">
+                        📝 Marks
+                    </button>
+                </a>
+
+            </div>
+
+        </div>
+
+        {% endfor %}
+
+    {% else %}
+
+        <h3 style="text-align:center;">
+            No Classes Assigned
+        </h3>
+    {% endif %}
+    <br>
+    <a href="/faculty-dashboard/{{username}}">
+        <button type="button">
+            ← Back to Dashboard
+        </button>
+    </a>
+
+</div>
+
+</body>
+
+</html>

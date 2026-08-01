@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Marks</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+<div class="container">
+    <h2>📝 My Marks</h2>
+    <div class="assignment-card">
+        <h3>{{ student.full_name }}</h3>
+        <p><strong>Student ID :</strong> {{ student.student_id }}</p>
+        <p><strong>Department :</strong> {{ student.department }}</p>
+        <p><strong>Semester :</strong> {{ student.semester }}</p>
+        <p><strong>Section :</strong> {{ student.section }}</p>
+    </div>
+    <br>
+    <table>
+        <tr>
+            <th>Subject</th>
+            <th>Assessment</th>
+            <th>Marks</th>
+            <th>Maximum</th>
+            <th>Result</th>
+        </tr>
+        {% for row in marks %}
+        <tr>
+            <td>{{ row.subject }}</td>
+            <td>{{ row.assessment_type }}</td>
+            <td>{{ row.marks }}</td>
+            <td>{{ row.max_marks }}</td>
+            <td>
+                {% if row.marks >= (row.max_marks*0.4) %}
+                    🟢 Pass
+                {% else %}
+                    🔴 Fail
+                {% endif %}
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+    <br>
+    <a href="/student-dashboard/{{username}}">
+        <button>
+            ← Back
+        </button>
+    </a>
+</div>
+</body>
+</html>

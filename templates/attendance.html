@@ -1,36 +1,69 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Attendance</title>
-    <link rel="stylesheet" href="/static/style.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Attendance</title>
+<link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
+
 <div class="container">
-    <h2>Attendance Details</h2>
-    <table>
-        <tr>
-            <th>Subject</th>
-            <th>Present</th>
-            <th>Total Classes</th>
-            <th>Attendance %</th>
-        </tr>
-        {% for row in records %}
-        <tr>
-            <td>{{ row.subject }}</td>
-            <td>{{ row.classes_present }}</td>
-            <td>{{ row.total_classes }}</td>
-            <td>{{ row.percentage }}%</td>
-        </tr>
-        {% endfor %}
-    </table>
-    <br>
-    <a href="/student-dashboard/{{username}}">
-        <button type="button">
-            ← Back to Dashboard
-        </button>
-    </a>
+
+<h2>Attendance History</h2>
+
+<table>
+
+<tr>
+<th>Date</th>
+<th>Subject</th>
+<th>Slot</th>
+<th>Status</th>
+</tr>
+
+{% for row in records %}
+
+<tr>
+
+<td>{{row.attendance_date}}</td>
+
+<td>{{row.subject}}</td>
+
+<td>{{row.slot}}</td>
+
+<td>
+
+{% if row.attendance_status=="Present" %}
+
+<span class="present-badge">
+🟢 Present
+</span>
+
+{% else %}
+
+<span class="absent-badge">
+🔴 Absent
+</span>
+
+{% endif %}
+
+</td>
+
+</tr>
+
+{% endfor %}
+
+</table>
+
+<br>
+
+<a href="/student-dashboard/{{username}}">
+<button>
+← Back to Dashboard
+</button>
+</a>
+
 </div>
+
 </body>
 </html>

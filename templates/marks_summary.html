@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Marks Summary</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+<div class="container attendance-summary">
+    <div class="success-box">
+        <h2>✅ Marks Saved Successfully</h2>
+    </div>
+    <br>
+    <div class="summary-card">
+        <h2>{{ session.subject }}</h2>
+        <hr>
+        <p><strong>Assessment :</strong> {{ session.assessment_type }}</p>
+        <p><strong>Department :</strong> {{ session.department }}</p>
+        <p><strong>Semester :</strong> {{ session.semester }}</p>
+        <p><strong>Section :</strong> {{ session.section }}</p>
+    </div>
+    <br>
+    <div class="summary-grid">
+        <div class="summary-item">
+            <h3>Total Students</h3>
+            <h1>{{ session.total_students }}</h1>
+        </div>
+        <div class="summary-item">
+            <h3>Highest</h3>
+            <h1>{{ session.highest_marks }}</h1>
+        </div>
+        <div class="summary-item">
+            <h3>Lowest</h3>
+            <h1>{{ session.lowest_marks }}</h1>
+        </div>
+        <div class="summary-item">
+            <h3>Average</h3>
+            <h1>{{ session.average_marks }}</h1>
+        </div>
+        <div class="summary-item">
+            <h3>Pass %</h3>
+            <h1>{{ session.pass_percentage }}%</h1>
+        </div>
+    </div>
+    <br>
+    <div class="summary-buttons">
+        <a href="/view-marks/{{ session.session_id }}/{{ username }}">
+            <button>👁 View Marks</button>
+        </a>
+        <a href="/edit-marks/{{ session.session_id }}/{{ username }}">
+            <button>✏ Edit Marks</button>
+        </a>
+    </div>
+    <br>
+    <a href="/faculty-dashboard/{{ username }}">
+        <button>🏠 Dashboard</button>
+    </a>
+</div>
+</body>
+</html>

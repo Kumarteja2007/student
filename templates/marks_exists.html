@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Marks Already Uploaded</title>
+<link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+
+<div class="container">
+
+<h2>⚠ Marks Already Uploaded</h2>
+
+<div class="error-message">
+❌ Marks for this assessment have already been uploaded.
+</div>
+
+<br>
+
+<div class="class-details">
+<p><strong>Subject :</strong> {{session.subject}}</p>
+<p><strong>Assessment :</strong> {{session.exam_type}}</p>
+<p><strong>Semester :</strong> {{session.semester}}</p>
+<p><strong>Section :</strong> {{session.section}}</p>
+</div>
+
+<br>
+
+<a href="/view-marks/{{session.session_id}}/{{username}}">
+<button type="button">
+👁 View Marks
+</button>
+</a>
+
+&nbsp;&nbsp;
+
+<a href="/edit-marks/{{session.session_id}}/{{username}}">
+<button type="button">
+✏ Edit Marks
+</button>
+</a>
+
+<br><br>
+
+<a href="/faculty-marks/{{username}}">
+<button type="button">
+← Back
+</button>
+</a>
+
+</div>
+
+</body>
+</html>

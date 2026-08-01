@@ -8,14 +8,14 @@
 <body>
 <div class="container">
     <h2>Student Login System</h2>
-    {% if message %}
-    <div class="message">
-        {{ message }}
-    </div>
-    {% endif %}
     <!-- Login Form -->
     <div class="box">
         <h3>Login</h3>
+        {% if message %}
+        <div class="error-message">
+        ❌ {{message}}
+        </div>
+        {% endif %}
         <form action="/login" method="post">
             <input type="text" name="username" placeholder="Username" required>
             <input type="password" name="password" placeholder="Password" required>
@@ -39,7 +39,7 @@
            <input type="password" name="confirm_password" placeholder="Confirm Password" required>
            <button type="submit">
                Register
-               </button>
+            </button>
        </form>
     </div>
 </div>
