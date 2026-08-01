@@ -1,73 +1,99 @@
-# 🎓 College ERP System
+# 🎓 College ERP Management System
 
-A modern **College ERP (Enterprise Resource Planning)** web application developed using **FastAPI**, **MySQL**, **HTML**, **CSS**, and **Jinja2 Templates**.
-
-The system provides a secure and centralized platform where students can register, log in, manage their personal information, monitor attendance, view academic performance, access course materials, and receive important notifications through an intuitive dashboard.
+A complete College ERP Management System developed using **FastAPI**, **MySQL**, **HTML**, **CSS**, and **Jinja2**. The system provides separate portals for Students and Faculty to efficiently manage academic activities.
 
 ---
 
-## ✨ Features
+## 🚀 Features
 
 ### 👨‍🎓 Student Module
-
 - Student Registration
 - Student Login
-- Secure Password Hashing
-- Forgot Password
-- Reset Password
-- Change Password
 - Student Dashboard
-- Profile Management
-- Attendance Management
-- Marks Management
-- Timetable
-- Course Materials
-- Notifications
-- Logout
+- View Profile
+- Edit Profile
+- Change Password
+- Forgot Password
+- View Attendance
+- View Marks
+- View Timetable
+- Download Course Materials
+
+### 👨‍🏫 Faculty Module
+- Faculty Login
+- Faculty Dashboard
+- View Profile
+- Change Password
+- View Assigned Classes
+- Take Attendance
+- Edit Attendance
+- Attendance History
+- Attendance Summary
+- Enter Student Marks
+- Edit Marks
+- Marks Summary
+- Upload Course Materials
+- Edit Course Materials
+- View Uploaded Materials
 
 ---
 
 ## 🛠️ Technologies Used
 
-| Category | Technology |
-|----------|------------|
-| Backend | FastAPI |
-| Programming Language | Python |
-| Frontend | HTML5, CSS3 |
-| Template Engine | Jinja2 |
-| Database | MySQL |
-| ASGI Server | Uvicorn |
-| Environment Variables | python-dotenv |
+- FastAPI
+- Python
+- MySQL
+- HTML5
+- CSS3
+- Jinja2 Templates
+- JavaScript
+- Git
+- GitHub
 
 ---
 
 ## 📂 Project Structure
 
-```text
-student/
+```
+college-erp/
 │
 ├── app.py
 ├── database.sql
 ├── requirements.txt
-├── .env
+├── README.md
 ├── .gitignore
 │
 ├── static/
 │   └── style.css
 │
-└── templates/
-    ├── landing.html
-    ├── student_login.html
-    ├── student_register.html
-    ├── student_dashboard.html
-    ├── profile.html
-    ├── attendance.html
-    ├── marks.html
-    ├── timetable.html
-    ├── course_materials.html
-    ├── notifications.html
-    ├── change_password.html
-    └── reset_password.html
+├── templates/
+│   ├── landing.html
+│   ├── student_login.html
+│   ├── faculty_login.html
+│   ├── student_dashboard.html
+│   ├── faculty_dashboard.html
+│   ├── faculty_profile.html
+│   ├── faculty_attendance.html
+│   ├── take_attendance.html
+│   ├── attendance_summary.html
+│   ├── attendance_history.html
+│   ├── attendance_exists.html
+│   ├── edit_attendance.html
+│   ├── faculty_marks.html
+│   ├── enter_marks.html
+│   ├── edit_marks.html
+│   ├── marks_summary.html
+│   ├── marks_exists.html
+│   ├── upload_material.html
+│   ├── edit_material.html
+│   ├── faculty_materials.html
+│   ├── view_materials.html
+│   ├── student_marks.html
+│   ├── attendance.html
+│   ├── timetable.html
+│   └── ...
+│
+└── uploads/
 ```
 
 ---
@@ -86,17 +112,11 @@ Open your browser and visit:
 http://127.0.0.1:8000
 ```
 
-## 🚀 Future Enhancements
+## 🚧 Upcoming Features
 
-- Faculty Portal
-- Admin Dashboard
-- Course Registration
-- Fee Management
-- Assignment Submission
-- Email Notifications
-- Role-Based Access Control
-- JWT Authentication
-- REST API Integration
-- Responsive Mobile Interface
-
----
+- Admin Module
+- Email OTP Verification
+- Reports & Analytics
+- Notifications
+- Dashboard Charts
+- Responsive UI Improvements
