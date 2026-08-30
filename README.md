@@ -4,6 +4,14 @@ A complete College ERP Management System developed using **FastAPI**, **MySQL**,
 
 ---
 
+
+## 🌐 Live Website
+
+The project is deployed using Render.
+
+Live URL: https://student-erp-vvjo.onrender.com
+
+
 ## 🚀 Features
 
 ### 👨‍🎓 Student Module
