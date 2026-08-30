@@ -37,6 +37,7 @@ def hash_password(password):
 def landing(request: Request):
 
     return templates.TemplateResponse(
+        request,
         "landing.html",
         {
             "request": request
@@ -50,6 +51,7 @@ def student_login(request: Request):
     message = request.query_params.get("message", "")
 
     return templates.TemplateResponse(
+        request,
         "student_login.html",
         {
             "request": request,
@@ -62,6 +64,7 @@ def student_login(request: Request):
 @app.get("/student-dashboard/{username}", response_class=HTMLResponse)
 def student_dashboard(request: Request, username: str):
     return templates.TemplateResponse(
+        request,
         "student_dashboard.html",
         {
             "request": request,
@@ -92,7 +95,8 @@ def profile(request: Request, username: str):
     db.close()
 
     return templates.TemplateResponse(
-    "profile.html",
+        request,
+        "profile.html",
     {
         "request": request,
         "student": student,
@@ -111,6 +115,7 @@ def change_password_page(
     message = request.query_params.get("message", "")
 
     return templates.TemplateResponse(
+        request,
         "change_password.html",
         {
             "request": request,
@@ -211,6 +216,7 @@ def register_page(request: Request):
     message = request.query_params.get("message", "")
 
     return templates.TemplateResponse(
+        request,
         "student_register.html",
         {
             "request": request,
@@ -252,6 +258,7 @@ def attendance(request:Request,username:str):
     db.close()
 
     return templates.TemplateResponse(
+        request,
         "attendance.html",
         {
             "request":request,
@@ -312,6 +319,7 @@ def marks(request: Request, username: str):
     cursor.close()
     db.close()
     return templates.TemplateResponse(
+        request,
         "marks.html",
         {
             "request": request,
@@ -367,6 +375,7 @@ def timetable(request: Request, username: str):
     db.close()
 
     return templates.TemplateResponse(
+        request,
         "timetable.html",
         {
             "request": request,
@@ -396,6 +405,7 @@ def course_materials(request: Request, username: str):
     cursor.close()
     db.close()
     return templates.TemplateResponse(
+        request,
         "course_materials.html",
         {
             "request": request,
@@ -463,6 +473,7 @@ def student_marks(request: Request, username: str):
     cursor.close()
     db.close()
     return templates.TemplateResponse(
+        request,
         "student_marks.html",
         {
             "request": request,
@@ -478,6 +489,7 @@ def faculty_login_page(request: Request):
     message = request.query_params.get("message", "")
 
     return templates.TemplateResponse(
+        request,
         "faculty_login.html",
         {
             "request": request,
@@ -512,6 +524,7 @@ def faculty_dashboard(
     db.close()
 
     return templates.TemplateResponse(
+        request,
         "faculty_dashboard.html",
         {
             "request": request,
@@ -559,6 +572,7 @@ def faculty_assignments(
     db.close()
 
     return templates.TemplateResponse(
+        request,
         "faculty_assignments.html",
         {
             "request": request,
@@ -593,6 +607,7 @@ def faculty_profile(
     db.close()
 
     return templates.TemplateResponse(
+        request,
         "faculty_profile.html",
         {
             "request": request,
@@ -634,6 +649,7 @@ def faculty_attendance(request: Request, username: str):
     cursor.close()
     db.close()
     return templates.TemplateResponse(
+        request,
         "faculty_attendance.html",
         {
             "request": request,
@@ -691,6 +707,7 @@ def take_attendance(
     db.close()
 
     return templates.TemplateResponse(
+        request,
         "take_attendance.html",
         {
             "request": request,
@@ -726,6 +743,7 @@ def attendance_summary(
     db.close()
 
     return templates.TemplateResponse(
+        request,
         "attendance_summary.html",
         {
             "request": request,
@@ -759,6 +777,7 @@ def attendance_exists(
     db.close()
 
     return templates.TemplateResponse(
+        request,
         "attendance_exists.html",
         {
             "request": request,
@@ -815,6 +834,7 @@ def attendance_history(
     db.close()
 
     return templates.TemplateResponse(
+        request,
         "attendance_history.html",
         {
             "request": request,
@@ -864,6 +884,7 @@ def view_attendance(
     db.close()
 
     return templates.TemplateResponse(
+        request,
         "view_attendance.html",
         {
             "request": request,
@@ -910,6 +931,7 @@ def edit_attendance(
     db.close()
 
     return templates.TemplateResponse(
+        request,
         "edit_attendance.html",
         {
             "request": request,
@@ -949,6 +971,7 @@ def faculty_marks(
     cursor.close()
     db.close()
     return templates.TemplateResponse(
+        request,
         "faculty_marks.html",
         {
             "request": request,
@@ -982,6 +1005,7 @@ def select_assessment(request: Request, assignment_id: int, username: str):
     cursor.close()
     db.close()
     return templates.TemplateResponse(
+        request,
         "select_assessment.html",
         {
             "request":request,
@@ -1040,6 +1064,7 @@ def enter_marks(
     cursor.close()
     db.close()
     return templates.TemplateResponse(
+        request,
         "enter_marks.html",
         {
             "request": request,
@@ -1067,6 +1092,7 @@ def marks_summary(request: Request, session_id: int, username: str):
     cursor.close()
     db.close()
     return templates.TemplateResponse(
+        request,
         "marks_summary.html",
         {
             "request": request,
@@ -1103,6 +1129,7 @@ def view_marks(request: Request, session_id: int, username: str):
     cursor.close()
     db.close()
     return templates.TemplateResponse(
+        request,
         "view_marks.html",
         {
             "request": request,
@@ -1151,6 +1178,7 @@ def edit_marks(request: Request, session_id: int, username: str):
     cursor.close()
     db.close()
     return templates.TemplateResponse(
+        request,
         "edit_marks.html",
         {
             "request": request,
@@ -1180,6 +1208,7 @@ def upload_material(request:Request,username:str):
     cursor.close()
     db.close()
     return templates.TemplateResponse(
+        request,
         "upload_material.html",
         {
             "request":request,
@@ -1216,6 +1245,7 @@ def faculty_materials(request:Request,username:str):
     db.close()
 
     return templates.TemplateResponse(
+        request,
         "faculty_materials.html",
         {
             "request":request,
@@ -1248,7 +1278,9 @@ def edit_material(request:Request,id:int,username:str):
     material=cursor.fetchone()
     cursor.close()
     db.close()
-    return templates.TemplateResponse("edit_material.html",{"request":request,"username":username,"material":material})
+    return templates.TemplateResponse(
+        request,
+        "edit_material.html",{"request":request,"username":username,"material":material})
 
 
 #------------------Download Materials-----------------
@@ -1271,6 +1303,7 @@ def download_material(id:int):
 def faculty_change_password(request:Request,username:str):
     message=request.query_params.get("message","")
     return templates.TemplateResponse(
+        request,
         "faculty_change_password.html",
         {
             "request":request,
@@ -1482,6 +1515,7 @@ def forgot_password(request: Request):
     message = request.query_params.get("message", "")
 
     return templates.TemplateResponse(
+        request,
         "forgot_password.html",
         {
             "request": request,
@@ -1518,7 +1552,8 @@ def verify_user(
     if user:
 
         return templates.TemplateResponse(
-            "reset_password.html",
+        request,
+        "reset_password.html",
             {
                 "request": request,
                 "username": username,
@@ -2126,6 +2161,7 @@ def marks_exists(
     db.close()
 
     return templates.TemplateResponse(
+        request,
         "marks_exists.html",
         {
             "request": request,
